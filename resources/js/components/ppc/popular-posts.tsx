@@ -10,8 +10,8 @@ interface PopularPost {
     title: string;
     category: string;
     date: string;
-    image: string;
-    href: string;
+    picture1: string;
+    slug: string;
 }
 
 const popularPosts: PopularPost[] = [
@@ -20,44 +20,44 @@ const popularPosts: PopularPost[] = [
         title: 'Muhammadiyah Bulukumba Pusatkan Pelaksanaan Idul Fitri 1446 H di Kompleks Perguruan Teko',
         category: 'Sosial',
         date: '29 Maret 2025',
-        image: '/placeholder.svg?height=300&width=400',
-        href: '/article/muhammadiyah-bulukumba',
+        picture1: '/placeholder.svg?height=300&width=400',
+        slug: '/article/muhammadiyah-bulukumba',
     },
     {
         id: 2,
         title: 'Memaknai Humanisme Dalam Konteks Kemuhammadiyahan',
         category: 'Teologi',
         date: '27 Mei 2022',
-        image: '/placeholder.svg?height=300&width=400',
-        href: '/article/memaknai-humanisme',
+        picture1: '/placeholder.svg?height=300&width=400',
+        slug: '/article/memaknai-humanisme',
     },
     {
         id: 3,
         title: 'Israel Diakui, Palestina Merdeka? Siapa Percaya? Hubungan Diplomatik yang Problematik',
         category: 'News',
         date: '01 Juni 2025',
-        image: '/placeholder.svg?height=300&width=400',
-        href: '/article/israel-diakui',
+        picture1: '/placeholder.svg?height=300&width=400',
+        slug: '/article/israel-diakui',
     },
     {
         id: 4,
         title: 'Matangkan Skil Penulisan Karya Ilmiah, Prodi PTI Gelar Pembinaan dan Pendampingan Penggunaan Mendeley',
         category: 'Pendidikan',
         date: '25 April 2025',
-        image: '/placeholder.svg?height=300&width=400',
-        href: '/article/matangkan-skil',
+        picture1: '/placeholder.svg?height=300&width=400',
+        slug: '/article/matangkan-skil',
     },
     {
         id: 5,
         title: 'MTQ ke-XVIII Desa Bulo-Bulo Resmi Dibuka oleh Camat Bulukumpa',
         category: 'Teologi',
         date: '16 Maret 2025',
-        image: '/placeholder.svg?height=300&width=400',
-        href: '/article/mtq-ke-xviii',
+        picture1: '/placeholder.svg?height=300&width=400',
+        slug: '/article/mtq-ke-xviii',
     },
 ];
 
-export function PopularPosts() {
+export function PopularPosts({ popularPostsX }: any) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [itemsPerView, setItemsPerView] = useState(4);
 
@@ -111,11 +111,11 @@ export function PopularPosts() {
                             transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
                         }}
                     >
-                        {popularPosts.map((post) => (
+                        {popularPosts.map((post: PopularPost) => (
                             <div key={post.id} className="flex-shrink-0 px-2" style={{ width: `${100 / itemsPerView}%` }}>
                                 <div className="group relative h-[300px] overflow-hidden rounded-lg">
                                     <img
-                                        src={post.image || '/placeholder.svg'}
+                                        src={`/storage/${post.picture1}` || '/placeholder.svg'}
                                         alt={post.title}
                                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                                     />
@@ -126,7 +126,7 @@ export function PopularPosts() {
                                             <span className="text-xs">{post.date}</span>
                                         </div>
                                         <a
-                                            href={post.href}
+                                            href={`/blog/${post.slug}`}
                                             className="line-clamp-3 text-sm leading-tight font-semibold uppercase transition-colors hover:text-blue-300"
                                         >
                                             {post.title}

@@ -6,14 +6,14 @@ import { Eye, User } from 'lucide-react';
 interface Article {
     id: string;
     title: string;
-    category: string;
+    category: any;
     date: string;
-    image: string;
-    author: string;
+    picture1: string;
+    author: any;
     authorImage: string;
     views: number;
     users: number;
-    content: string;
+    body1: string;
 }
 
 interface ArticleDetailProps {
@@ -21,13 +21,15 @@ interface ArticleDetailProps {
 }
 
 export function ArticleDetail({ article }: ArticleDetailProps) {
+    console.log(article.category);
+
     return (
         <div className="space-y-6">
             {/* Article Card */}
             <article className="overflow-hidden rounded-lg border bg-white shadow-sm">
                 {/* Featured Image */}
-                <div className="relative h-[400px] md:h-[500px]">
-                    <img src={article.image || '/placeholder.svg'} alt={article.title} fill className="object-cover" />
+                <div className="relative h-[400px] overflow-hidden md:h-[500px]">
+                    <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="object-cover" />
                 </div>
 
                 {/* Article Content */}
@@ -42,13 +44,19 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
                     <h1 className="mb-6 text-2xl leading-tight font-bold text-gray-900 uppercase md:text-3xl">{article.title}</h1>
 
                     {/* Article Content */}
-                    <div className="prose prose-lg max-w-none leading-relaxed text-gray-800" dangerouslySetInnerHTML={{ __html: article.content }} />
+                    <div className="prose prose-lg max-w-none leading-relaxed text-gray-800" dangerouslySetInnerHTML={{ __html: article.body1 }} />
                 </div>
 
                 {/* Author and Stats */}
                 <div className="flex items-center justify-between border-t bg-gray-50 p-6">
-                    <div className="flex items-center space-x-3">
-                        <img src={article.authorImage || '/placeholder.svg'} alt={article.author} width={30} height={30} className="rounded-full" />
+                    <div className="space-x-3x flex items-center">
+                        <img
+                            src={`/storage/${article.authorImage}` || '/placeholder.svg'}
+                            alt={article.author}
+                            width={30}
+                            height={30}
+                            className="rounded-full"
+                        />
                         <span className="font-medium text-gray-700">{article.author}</span>
                     </div>
                     <div className="flex items-center space-x-4 text-gray-600">

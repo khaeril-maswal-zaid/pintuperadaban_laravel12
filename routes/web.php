@@ -3,9 +3,9 @@
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [BlogController::class, 'home'])->name('home');
+Route::get('/blog/{blog:slug}', [BlogController::class, 'show'])->name('show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [HomeController::class, 'dashboard'])->name('dashboard');

@@ -6,77 +6,15 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Article {
-    id: number;
+    slug: string;
     title: string;
-    category: string;
-    date: string;
-    image: string;
-    href: string;
+    picture1: string;
+    category_articles_id: number;
+    category: any;
+    created_at: string;
 }
 
-const featuredArticles: Article[] = [
-    {
-        id: 1,
-        title: 'UKT Elit Fasilitas Sulit : Mahasiswa Keluhkan Fasilitas Kampus, hingga Ketidakpastian Jadwal Kuliah. UMK Diminta Berbenah',
-        category: 'Pendidikan',
-        date: '11 Juni 2025',
-        image: '/placeholder.svg?height=500&width=800',
-        href: '/article/ukt-elit-fasilitas-sulit',
-    },
-    {
-        id: 2,
-        title: 'Fitma Ungkap Tambang Ilegal di Konawe: Ancaman Nyata bagi Lingkungan dan Generasi Mendatang',
-        category: 'Pendidikan',
-        date: '10 Juni 2025',
-        image: '/placeholder.svg?height=500&width=800',
-        href: '/article/fitma-ungkap-tambang-ilegal',
-    },
-    {
-        id: 3,
-        title: 'Fitri, Mahasiswi Hukum UHO,Soroti Pendekatan Damai Polri terhadap KKB Papua dalam Jurnal Ilmiah',
-        category: 'Pendidikan',
-        date: '10 Juni 2025',
-        image: '/placeholder.svg?height=500&width=800',
-        href: '/article/fitri-mahasiswi-hukum',
-    },
-];
-
-const sideArticles: Article[] = [
-    {
-        id: 4,
-        title: 'PCM Baruga Gelar Penyembelihan Hewan Kurban Untuk pertama Kalinya',
-        category: 'Sosial',
-        date: '07 Juni 2025',
-        image: '/placeholder.svg?height=250&width=400',
-        href: '/article/pcm-baruga-gelar',
-    },
-    {
-        id: 5,
-        title: 'Tragedi Jembatan Teluk Kendari : Mahasiswa Psikologi Islam UMKendari Serukan Kepedulian Kesehatan Mental',
-        category: 'News',
-        date: '02 Juni 2025',
-        image: '/placeholder.svg?height=250&width=400',
-        href: '/article/tragedi-jembatan',
-    },
-    {
-        id: 6,
-        title: 'Salah Satu Kader PK IMM FAI Soroti Kekosongan Kepemimpinan BEM FAI UM Kendari',
-        category: 'Opini',
-        date: '05 Mei 2025',
-        image: '/placeholder.svg?height=250&width=400',
-        href: '/article/salah-satu-kader',
-    },
-    {
-        id: 7,
-        title: 'Kolaborasi Lintas Kampus: KPS UMKendari & KPS UHO Hadirkan Wawasan Baru Lewat Kuliah Umum dan Sharing Session',
-        category: 'News',
-        date: '03 Mei 2025',
-        image: '/placeholder.svg?height=250&width=400',
-        href: '/article/kolaborasi-lintas',
-    },
-];
-
-export function HeroCarousel() {
+export function HeroCarousel({ featuredArticles, sideArticles }: any) {
     const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
@@ -100,22 +38,22 @@ export function HeroCarousel() {
                 {/* Main Carousel */}
                 <div className="relative lg:w-7/12">
                     <div className="relative h-[500px] overflow-hidden">
-                        {featuredArticles.map((article, index) => (
+                        {featuredArticles.map((article: Article, index: number) => (
                             <div
-                                key={article.id}
+                                key={article.slug}
                                 className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
                                     index === currentSlide ? 'translate-x-0' : 'translate-x-full'
                                 }`}
                             >
-                                <img src={article.image || '/placeholder.svg'} alt={article.title} className="object-cover" />
+                                <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="object-cover" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute right-0 bottom-0 left-0 p-6 text-white">
                                     <div className="mb-4">
-                                        <Badge className="mr-4 bg-blue-600 text-white hover:bg-blue-700">{article.category}</Badge>
-                                        <span className="text-sm">{article.date}</span>
+                                        <Badge className="mr-4 bg-blue-600 text-white hover:bg-blue-700">{article?.category.name}</Badge>
+                                        <span className="text-sm">{article.created_at}</span>
                                     </div>
                                     <a
-                                        href={article.href}
+                                        href={`/blog/${article.slug}`}
                                         className="text-2xl leading-tight font-bold uppercase transition-colors hover:text-blue-300"
                                     >
                                         {article.title}
@@ -145,7 +83,7 @@ export function HeroCarousel() {
 
                     {/* Dots Indicator */}
                     <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 space-x-2">
-                        {featuredArticles.map((_, index) => (
+                        {featuredArticles.map((_: any, index: any) => (
                             <button
                                 key={index}
                                 className={`h-2 w-2 rounded-full transition-colors ${index === currentSlide ? 'bg-white' : 'bg-white/50'}`}
@@ -158,21 +96,21 @@ export function HeroCarousel() {
                 {/* Side Articles Grid */}
                 <div className="lg:w-5/12">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-                        {sideArticles.map((article) => (
-                            <div key={article.id} className="group relative h-[250px] overflow-hidden">
+                        {sideArticles.map((article: Article) => (
+                            <div key={article.slug} className="group relative h-[250px] overflow-hidden">
                                 <img
-                                    src={article.image || '/placeholder.svg'}
+                                    src={`/storage/${article.picture1}` || '/placeholder.svg'}
                                     alt={article.title}
-                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute right-0 bottom-0 left-0 p-4 text-white">
                                     <div className="mb-2">
-                                        <Badge className="mr-2 bg-blue-600 text-xs text-white hover:bg-blue-700">{article.category}</Badge>
-                                        <span className="text-xs">{article.date}</span>
+                                        <Badge className="mr-2 bg-blue-600 text-xs text-white hover:bg-blue-700">{article?.category.name}</Badge>
+                                        <span className="text-xs">{article.created_at}</span>
                                     </div>
                                     <a
-                                        href={article.href}
+                                        href={`/blog/${article.slug}`}
                                         className="line-clamp-3 text-sm leading-tight font-semibold uppercase transition-colors hover:text-blue-300"
                                     >
                                         {article.title}

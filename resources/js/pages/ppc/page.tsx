@@ -6,17 +6,17 @@ import { Navigation } from '@/components/ppc/navigation';
 import { PopularPosts } from '@/components/ppc/popular-posts';
 import { Sidebar } from '@/components/ppc/sidebar';
 
-export default function HomePage() {
+export default function HomePage({ mainBlog, generalBlog, latestBlog, categorizedBlog }: any) {
     return (
         <div className="min-h-screen bg-white">
             <Header />
             <Navigation />
-            <HeroCarousel />
+            <HeroCarousel featuredArticles={mainBlog} sideArticles={generalBlog} />
             <PopularPosts />
 
             <div className="container mx-auto px-4">
                 <div className="flex flex-col gap-6 lg:flex-row">
-                    <MainContent />
+                    <MainContent latestNews={latestBlog} categoryNews={categorizedBlog} />
                     <Sidebar />
                 </div>
             </div>

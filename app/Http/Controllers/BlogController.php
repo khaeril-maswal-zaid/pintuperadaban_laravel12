@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Blog;
 use App\Http\Requests\StoreBlogRequest;
 use App\Http\Requests\UpdateBlogRequest;
+use App\Models\CategoryArticle;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Storage;
@@ -72,7 +73,7 @@ class BlogController extends Controller
             'picture1' => $mainPath,
             'picture2' =>  $mainPath1,
             'tags' => $request->tags,
-            'category' => $request->category,
+            'category_articles_id' => $request->category,
             'level' => 'main',
             'views' => 50
         ]);
@@ -109,8 +110,10 @@ class BlogController extends Controller
             Cache::put($cacheKey, true, now()->addMinutes(60));
         }
 
-        // 4️ Tampilkan view
-        return view('news.show', compact('news'));
+
+        return Inertia::render('ppc/article/page', [
+            'articleData' => $blog
+        ]);
     }
 
     /**
@@ -135,5 +138,67 @@ class BlogController extends Controller
     public function destroy(Blog $blog)
     {
         //
+    }
+
+    function home(): Response
+    {
+        $mainBlog = Blog::select(['slug', 'title', 'picture1', 'category_articles_id', 'created_at'])
+            ->where('level', 'main')
+            ->with('category')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $generalBlog = Blog::select(['slug', 'title', 'picture1', 'category_articles_id', 'created_at'])
+            ->where('level', 'general')
+            ->with('category')
+            ->latest()
+            ->take(4)
+            ->get();
+
+        // Gabungkan slug dari main dan general
+        $excludedSlugs = $mainBlog->pluck('slug')
+            ->merge($generalBlog->pluck('slug'))
+            ->all();
+
+        $latestBlog = Blog::select(['slug',  'excerpt', 'title', 'picture1', 'category_articles_id', 'user_id', 'views', 'created_at'])
+            ->whereNotIn('slug', $excludedSlugs)
+            ->whereHas('category', function ($query) {
+                $query->where('slug', 'news');
+            })
+            ->with('category')
+            ->with('author')
+            ->latest()
+            ->take(4)
+            ->get();
+
+
+        $kategori = CategoryArticle::select('id')->get();
+
+        $categorizedBlog = collect(); // untuk menampung hasil akhir | Kira-kira sama []
+
+        foreach ($kategori as $kat) {
+            $blog = Blog::select(['slug', 'title', 'picture1', 'category_articles_id',  'user_id', 'views', 'created_at'])
+                ->where('category_articles_id', $kat->id)
+                ->with('category')
+                ->with('author')
+                ->whereNotIn('slug', $excludedSlugs)
+                ->latest()
+                ->first(); // ambil 1 berita per kategori
+
+            if ($blog) {
+                $categorizedBlog->push($blog);
+                $excludedSlugs[] = $blog->slug; // tambah ke daftar slug yang sudah dipakai
+            }
+        }
+
+        $data = [
+            'mainBlog' => $mainBlog,
+            'generalBlog' => $generalBlog,
+            'latestBlog' => $latestBlog,
+            'categorizedBlog' => $categorizedBlog, // hasil: 1 per kategori
+        ];
+
+        return Inertia::render('ppc/page', $data);
     }
 }

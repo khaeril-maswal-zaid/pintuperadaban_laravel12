@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('picture1')->default('default.png');
             $table->string('picture2')->nullable();
             $table->json('tags')->nullable();
-            $table->string('category')->nullable();
+            $table->foreignId('category_articles_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('level', ['main', 'general'])->default('general');
             $table->integer('views')->default(50);
             $table->timestamps();
