@@ -8,8 +8,8 @@ import { useEffect, useState } from 'react';
 interface PopularPost {
     id: number;
     title: string;
-    category: string;
-    date: string;
+    category: any;
+    created_at: string;
     picture1: string;
     slug: string;
 }
@@ -57,7 +57,7 @@ const popularPosts: PopularPost[] = [
     },
 ];
 
-export function PopularPosts({ popularPostsX }: any) {
+export function PopularPosts({ popularPosts }: any) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [itemsPerView, setItemsPerView] = useState(4);
 
@@ -112,22 +112,24 @@ export function PopularPosts({ popularPostsX }: any) {
                         }}
                     >
                         {popularPosts.map((post: PopularPost) => (
-                            <div key={post.id} className="flex-shrink-0 px-2" style={{ width: `${100 / itemsPerView}%` }}>
+                            <div key={post.slug} className="flex-shrink-0 px-2" style={{ width: `${100 / itemsPerView}%` }}>
                                 <div className="group relative h-[300px] overflow-hidden rounded-lg">
                                     <img
-                                        src={`/storage/${post.picture1}` || '/placeholder.svg'}
+                                        src={`/storage/${post?.picture1}` || '/placeholder.svg'}
                                         alt={post.title}
                                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                     <div className="absolute right-0 bottom-0 left-0 p-4 text-white">
                                         <div className="mb-2">
-                                            <Badge className="mr-2 bg-blue-600 text-xs text-white hover:bg-blue-700">{post.category}</Badge>
-                                            <span className="text-xs">{post.date}</span>
+                                            <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">
+                                                {post?.category?.name}
+                                            </Badge>
+                                            <span className="text-xs">{post.created_at}</span>
                                         </div>
                                         <a
                                             href={`/blog/${post.slug}`}
-                                            className="line-clamp-3 text-sm leading-tight font-semibold uppercase transition-colors hover:text-blue-300"
+                                            className="line-clamp-3 text-sm leading-tight font-semibold uppercase transition-colors hover:text-yellow-300"
                                         >
                                             {post.title}
                                         </a>

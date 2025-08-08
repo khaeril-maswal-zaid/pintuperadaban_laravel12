@@ -1,5 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 
 const popularPosts = [
@@ -58,6 +60,10 @@ const categories = [
 ];
 
 export function Sidebar() {
+    const { iklans } = usePage<SharedData>().props;
+    const advertise = iklans.filter((iklan: any) => iklan.type === '1-2')[0];
+    const advMobile = iklans.filter((iklan: any) => iklan.type === '1-1')[0];
+
     return (
         <div className="space-y-6 lg:w-1/3">
             {/* Advertisement */}
@@ -67,13 +73,11 @@ export function Sidebar() {
                 </div>
                 <div className="p-4 text-center">
                     <div className="hidden md:block">
-                        <div className="rounded bg-gray-100 p-8">
-                            <span className="text-gray-600">Advertisement Space</span>
-                        </div>
+                        <img src={`storage/${advertise.image}`} className="rounded" alt="" />
                     </div>
                     <div className="block md:hidden">
                         <div className="rounded bg-gray-100 p-4">
-                            <span className="text-gray-600">Mobile Ad</span>
+                            <img src={`storage/${advMobile.image}`} className="rounded" alt="" />
                         </div>
                     </div>
                 </div>
@@ -94,7 +98,7 @@ export function Sidebar() {
                         <div className="flex h-12 w-16 items-center justify-center bg-black/20">
                             <Facebook className="h-5 w-5" />
                         </div>
-                        <span className="flex-1 text-center font-medium">Pintu Peradaban Com</span>
+                        <span className="flex-1 font-medium">Pintu Peradaban Com</span>
                     </a>
                     <a
                         href="https://web.facebook.com/profile.php?id=100083999477470"
@@ -105,7 +109,7 @@ export function Sidebar() {
                         <div className="flex h-12 w-16 items-center justify-center bg-black/20">
                             <Twitter className="h-5 w-5" />
                         </div>
-                        <span className="flex-1 text-center font-medium">@pintuperadaban</span>
+                        <span className="flex-1 font-medium">@pintuperadaban</span>
                     </a>
                     <a
                         href="https://web.facebook.com/profile.php?id=100083999477470"
@@ -116,7 +120,7 @@ export function Sidebar() {
                         <div className="flex h-12 w-16 items-center justify-center bg-black/20">
                             <Instagram className="h-5 w-5" />
                         </div>
-                        <span className="flex-1 text-center font-medium">@official.ppc</span>
+                        <span className="flex-1 font-medium">@official.ppc</span>
                     </a>
                     <a
                         href="https://web.facebook.com/profile.php?id=100083999477470"
@@ -127,7 +131,7 @@ export function Sidebar() {
                         <div className="flex h-12 w-16 items-center justify-center bg-black/20">
                             <Youtube className="h-5 w-5" />
                         </div>
-                        <span className="flex-1 text-center font-medium">Pintu Peradaban</span>
+                        <span className="flex-1 font-medium">Pintu Peradaban</span>
                     </a>
                 </div>
             </div>
@@ -145,12 +149,12 @@ export function Sidebar() {
                             </div>
                             <div className="flex flex-1 flex-col justify-center pl-3">
                                 <div className="mb-2">
-                                    <Badge className="mr-2 bg-blue-600 text-xs text-white hover:bg-blue-700">{post.category}</Badge>
+                                    <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">{post.category}</Badge>
                                     <span className="text-xs text-gray-600">{post.date}</span>
                                 </div>
                                 <a
                                     href={post.href}
-                                    className="line-clamp-2 text-sm font-bold text-gray-900 uppercase transition-colors hover:text-blue-600"
+                                    className="line-clamp-2 text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
                                     {post.title}
                                 </a>
@@ -171,9 +175,9 @@ export function Sidebar() {
                         <input
                             type="email"
                             placeholder="Your Email"
-                            className="flex-1 rounded-l border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="flex-1 rounded-l border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-yellow-500 focus:outline-none"
                         />
-                        <Button className="rounded-l-none bg-blue-600 px-4 text-white hover:bg-blue-700">Sign Up</Button>
+                        <Button className="rounded-l-none bg-yellow-400 px-4 text-gray-900 hover:bg-yellow-500">Sign Up</Button>
                     </div>
                     <p className="text-xs text-gray-500">Pastikan alamat email mu aktif</p>
                 </div>

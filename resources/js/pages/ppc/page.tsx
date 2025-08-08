@@ -6,13 +6,13 @@ import { Navigation } from '@/components/ppc/navigation';
 import { PopularPosts } from '@/components/ppc/popular-posts';
 import { Sidebar } from '@/components/ppc/sidebar';
 
-export default function HomePage({ mainBlog, generalBlog, latestBlog, categorizedBlog }: any) {
+export default function HomePage({ mainBlog, generalBlog, latestBlog, categorizedBlog, populer }: any) {
     return (
         <div className="min-h-screen bg-white">
             <Header />
             <Navigation />
             <HeroCarousel featuredArticles={mainBlog} sideArticles={generalBlog} />
-            <PopularPosts />
+            <PopularPosts popularPosts={populer} />
 
             <div className="container mx-auto px-4">
                 <div className="flex flex-col gap-6 lg:flex-row">

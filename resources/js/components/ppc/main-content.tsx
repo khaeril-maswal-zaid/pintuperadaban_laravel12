@@ -1,4 +1,6 @@
 import { Badge } from '@/components/ui/badge';
+import { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
 
 interface Article {
@@ -13,34 +15,31 @@ interface Article {
 }
 
 export function MainContent({ latestNews, categoryNews }: any) {
+    const { iklans } = usePage<SharedData>().props;
+    const advertise = iklans.filter((iklan: any) => iklan.type === '1-2')[0];
+
     const bigLatestNews = latestNews.slice(0, 2);
     const smallLatestNews = latestNews.slice(2, 4);
     const featuredOpini = categoryNews.slice(0, 1)[0];
-    const allCategoryNews = categoryNews;
-
-    console.log(featuredOpini);
+    const allCategoryNews = categoryNews.slice(1);
 
     return (
         <div className="space-y-8 lg:w-2/3">
             {/* Advertisement Banner */}
-            <div className="w-full">
-                <div className="rounded bg-gray-100 p-4 text-center">
-                    <span className="text-gray-600">Advertisement Banner</span>
-                </div>
-            </div>
+            <img src={`storage/${advertise.image}`} className="rounded" alt="" />
 
             {/* Latest News Section */}
             <div>
                 <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-gray-900 uppercase">Latest News</h2>
-                    <a href="/category/news" className="font-medium text-blue-600 hover:text-blue-800">
+                    <a href="/category/news" className="font-medium text-yellow-400 hover:text-yellow-500">
                         View All
                     </a>
                 </div>
 
                 <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {bigLatestNews.map((article: Article) => (
-                        <article key={article.slug} className="rounded-lg border bg-white shadow-sm">
+                        <article key={article.slug} className="flex flex-col justify-between rounded-lg border bg-white shadow-sm">
                             <div className="h-[360px]">
                                 <img
                                     src={`/storage/${article.picture1}` || '/placeholder.svg'}
@@ -50,12 +49,12 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             </div>
                             <div className="p-6">
                                 <div className="mb-3">
-                                    <Badge className="mr-3 bg-blue-600 text-white hover:bg-blue-700">{article?.category.name}</Badge>
+                                    <Badge className="mr-3 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{article?.category.name}</Badge>
                                     <span className="text-sm text-gray-600">{article.created_at}</span>
                                 </div>
                                 <a
                                     href={`/blog/${article.slug}`}
-                                    className="mb-3 block text-xl font-bold text-gray-900 uppercase transition-colors hover:text-blue-600"
+                                    className="mb-3 block text-xl font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
                                     {article.title}
                                 </a>
@@ -64,7 +63,7 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             <div className="flex items-center justify-between border-t p-5">
                                 <div className="flex items-center space-x-2">
                                     <img
-                                        src={article?.author.image || '/placeholder.svg'}
+                                        src={`/storage/${article?.author.image}` || '/placeholder.svg'}
                                         alt={article?.author.name}
                                         width={31}
                                         height={31}
@@ -94,12 +93,12 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             </div>
                             <div className="flex flex-1 flex-col justify-center p-4">
                                 <div className="mb-2">
-                                    <Badge className="mr-2 bg-blue-600 text-xs text-white hover:bg-blue-700">{item?.category.name}</Badge>
+                                    <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">{item?.category.name}</Badge>
                                     <span className="text-xs text-gray-600">{item.created_at}</span>
                                 </div>
                                 <a
                                     href={`/blog/${item.slug}`}
-                                    className="text-sm font-bold text-gray-900 uppercase transition-colors hover:text-blue-600"
+                                    className="text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
                                     {item.title}
                                 </a>
@@ -130,7 +129,7 @@ export function MainContent({ latestNews, categoryNews }: any) {
             <div>
                 <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-gray-900 uppercase">Category</h2>
-                    <a href="/category/opini" className="font-medium text-blue-600 hover:text-blue-800">
+                    <a href="/category/opini" className="font-medium text-yellow-400 hover:text-yellow-500">
                         View All
                     </a>
                 </div>
@@ -140,24 +139,24 @@ export function MainContent({ latestNews, categoryNews }: any) {
                     <div className="flex flex-col md:flex-row">
                         <div className="relative h-[300px] md:h-auto md:w-1/2">
                             <img
-                                src={`/storage/${featuredOpini.picture1}` || '/placeholder.svg'}
-                                alt={featuredOpini.title}
+                                src={`/storage/${featuredOpini?.picture1}` || '/placeholder.svg'}
+                                alt={featuredOpini?.title}
                                 className="h-full w-full object-cover"
                             />
                         </div>
                         <div className="flex flex-col justify-between p-6 md:w-1/2">
                             <div>
                                 <div className="mb-3">
-                                    <Badge className="mr-3 bg-blue-600 text-white hover:bg-blue-700">{featuredOpini?.category.name}</Badge>
-                                    <span className="text-sm text-gray-600">{featuredOpini.created_at}</span>
+                                    <Badge className="mr-3 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{featuredOpini?.category.name}</Badge>
+                                    <span className="text-sm text-gray-600">{featuredOpini?.created_at}</span>
                                 </div>
                                 <a
-                                    href={`/blog/${featuredOpini.slug}`}
-                                    className="mb-3 block text-xl font-bold text-gray-900 uppercase transition-colors hover:text-blue-600"
+                                    href={`/blog/${featuredOpini?.slug}`}
+                                    className="mb-3 block text-xl font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
-                                    {featuredOpini.title}
+                                    {featuredOpini?.title}
                                 </a>
-                                <p className="line-clamp-4 text-gray-600">{featuredOpini.excerpt}</p>
+                                <p className="line-clamp-4 text-gray-600">{featuredOpini?.excerpt}</p>
                             </div>
                             <div className="mt-4 flex items-center justify-between border-t pt-4">
                                 <div className="flex items-center space-x-2">
@@ -172,7 +171,7 @@ export function MainContent({ latestNews, categoryNews }: any) {
                                 </div>
                                 <div className="flex items-center space-x-2 text-gray-600">
                                     <Eye className="h-4 w-4" />
-                                    <span className="text-sm">{featuredOpini.views}</span>
+                                    <span className="text-sm">{featuredOpini?.views}</span>
                                 </div>
                             </div>
                         </div>
@@ -192,12 +191,12 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             </div>
                             <div className="flex flex-1 flex-col justify-center p-4">
                                 <div className="mb-2">
-                                    <Badge className="mr-2 bg-blue-600 text-xs text-white hover:bg-blue-700">{item?.category.name}</Badge>
+                                    <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">{item?.category.name}</Badge>
                                     <span className="text-xs text-gray-600">{item.created_at}</span>
                                 </div>
                                 <a
                                     href={`/blog/${item.slug}`}
-                                    className="text-sm font-bold text-gray-900 uppercase transition-colors hover:text-blue-600"
+                                    className="text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
                                     {item.title}
                                 </a>

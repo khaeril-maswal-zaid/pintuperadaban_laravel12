@@ -1,7 +1,10 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Eye, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Copy, Eye, Facebook, Linkedin, Share2, Tag, Twitter, User } from 'lucide-react';
 
 interface Article {
     id: string;
@@ -21,15 +24,13 @@ interface ArticleDetailProps {
 }
 
 export function ArticleDetail({ article }: ArticleDetailProps) {
-    console.log(article.category);
-
     return (
         <div className="space-y-6">
             {/* Article Card */}
             <article className="overflow-hidden rounded-lg border bg-white shadow-sm">
                 {/* Featured Image */}
-                <div className="relative h-[400px] overflow-hidden md:h-[500px]">
-                    <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="object-cover" />
+                <div className="relative h-[400px] overflow-hidden md:h-[550px]">
+                    <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="min-w-full object-cover" />
                 </div>
 
                 {/* Article Content */}
@@ -78,12 +79,6 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
     );
 }
 
-// Combined Tags and Share Component
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { Copy, Facebook, Linkedin, Share2, Tag, Twitter } from 'lucide-react';
-
 function TagsAndShare({ article }: { article: Article }) {
     const { toast } = useToast();
 
@@ -121,7 +116,7 @@ function TagsAndShare({ article }: { article: Article }) {
     };
 
     return (
-        <Card>
+        <Card className="gap-2 py-2">
             <CardContent className="space-y-6 p-6">
                 {/* Tags Section */}
                 <div>

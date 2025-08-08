@@ -23,9 +23,9 @@ export function Navigation() {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between">
                     {/* Mobile Logo */}
-                    <div className="py-2 lg:hidden">
-                        <a href="/" className="block max-w-[200px]">
-                            <img src="/placeholder.svg?height=40&width=200" alt="Pintu Peradaban" width={200} height={40} className="h-auto" />
+                    <div className="block py-5 lg:hidden">
+                        <a href="/">
+                            <img src="/image/assets/brand.png" alt="Pintu Peradaban" width={250} className="h-auto" />
                         </a>
                     </div>
 
@@ -77,7 +77,7 @@ export function Navigation() {
                                 <input
                                     type="text"
                                     placeholder="Keyword"
-                                    className="w-full rounded-l border-0 px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                    className="w-full rounded-l rounded-r-lg border-0 bg-gray-100 px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 />
                                 <Button className="absolute top-0 right-0 h-full rounded-l-none bg-blue-600 px-4 hover:bg-blue-700">
                                     <Search className="h-4 w-4" />

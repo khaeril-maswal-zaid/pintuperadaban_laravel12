@@ -110,9 +110,17 @@ class BlogController extends Controller
             Cache::put($cacheKey, true, now()->addMinutes(60));
         }
 
+        $latestBlog = Blog::select(['slug',  'excerpt', 'title', 'picture1', 'category_articles_id', 'user_id', 'views', 'created_at'])
+            ->whereNot('slug', $blog->slug)
+            ->with('category')
+            ->with('author')
+            ->latest()
+            ->take(4)
+            ->get();
 
         return Inertia::render('ppc/article/page', [
-            'articleData' => $blog
+            'articleData' => $blog,
+            'latestBlog' => $latestBlog,
         ]);
     }
 
@@ -192,11 +200,19 @@ class BlogController extends Controller
             }
         }
 
+        $populer = Blog::select(['slug', 'title', 'picture1', 'category_articles_id',  'user_id', 'views', 'created_at'])
+            ->with(['category', 'author'])
+            ->orderByDesc('views')
+            ->take(5)
+            ->get();
+
+
         $data = [
             'mainBlog' => $mainBlog,
             'generalBlog' => $generalBlog,
             'latestBlog' => $latestBlog,
             'categorizedBlog' => $categorizedBlog, // hasil: 1 per kategori
+            'populer' => $populer,
         ];
 
         return Inertia::render('ppc/page', $data);

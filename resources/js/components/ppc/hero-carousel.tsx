@@ -45,16 +45,20 @@ export function HeroCarousel({ featuredArticles, sideArticles }: any) {
                                     index === currentSlide ? 'translate-x-0' : 'translate-x-full'
                                 }`}
                             >
-                                <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="object-cover" />
+                                <img
+                                    src={`/storage/${article.picture1}` || '/placeholder.svg'}
+                                    alt={article.title}
+                                    className="h-full w-full object-cover"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute right-0 bottom-0 left-0 p-6 text-white">
                                     <div className="mb-4">
-                                        <Badge className="mr-4 bg-blue-600 text-white hover:bg-blue-700">{article?.category.name}</Badge>
+                                        <Badge className="mr-4 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{article?.category.name}</Badge>
                                         <span className="text-sm">{article.created_at}</span>
                                     </div>
                                     <a
                                         href={`/blog/${article.slug}`}
-                                        className="text-2xl leading-tight font-bold uppercase transition-colors hover:text-blue-300"
+                                        className="text-2xl leading-tight font-bold uppercase transition-colors hover:text-yellow-300"
                                     >
                                         {article.title}
                                     </a>
@@ -106,12 +110,14 @@ export function HeroCarousel({ featuredArticles, sideArticles }: any) {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute right-0 bottom-0 left-0 p-4 text-white">
                                     <div className="mb-2">
-                                        <Badge className="mr-2 bg-blue-600 text-xs text-white hover:bg-blue-700">{article?.category.name}</Badge>
+                                        <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">
+                                            {article?.category.name}
+                                        </Badge>
                                         <span className="text-xs">{article.created_at}</span>
                                     </div>
                                     <a
                                         href={`/blog/${article.slug}`}
-                                        className="line-clamp-3 text-sm leading-tight font-semibold uppercase transition-colors hover:text-blue-300"
+                                        className="line-clamp-3 text-sm leading-tight font-semibold uppercase transition-colors hover:text-yellow-300"
                                     >
                                         {article.title}
                                     </a>
