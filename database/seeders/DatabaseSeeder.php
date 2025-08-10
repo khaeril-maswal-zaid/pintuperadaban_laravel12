@@ -16,10 +16,16 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Official Pintu Peradaban',
+            'email' => 'official@pintuperadaban.com',
+            'image' => 'image/assets/pp.png',
+            'password' => 'PpcAdmin@2025',
         ]);
 
-        $this->call([CategoryArticleSeeder::class, IklanSeeder::class]);
+        $this->call([
+            CategoryArticleSeeder::class,
+            IklanSeeder::class,
+            KontakSeeder::class
+        ]);
     }
 }

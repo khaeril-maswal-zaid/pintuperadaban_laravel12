@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Eye, Facebook, Linkedin, Share2, Tag, Twitter, User } from 'lucide-react';
+import { Copy, Eye, Facebook, Linkedin, Share2, Tag, Twitter } from 'lucide-react';
 
 interface Article {
     id: string;
@@ -15,7 +15,6 @@ interface Article {
     author: any;
     authorImage: string;
     views: number;
-    users: number;
     body1: string;
 }
 
@@ -24,62 +23,6 @@ interface ArticleDetailProps {
 }
 
 export function ArticleDetail({ article }: ArticleDetailProps) {
-    return (
-        <div className="space-y-6">
-            {/* Article Card */}
-            <article className="overflow-hidden rounded-lg border bg-white shadow-sm">
-                {/* Featured Image */}
-                <div className="relative h-[400px] overflow-hidden md:h-[550px]">
-                    <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="min-w-full object-cover" />
-                </div>
-
-                {/* Article Content */}
-                <div className="p-6">
-                    {/* Category and Date */}
-                    <div className="mb-4">
-                        <Badge className="mr-3 bg-blue-600 text-white hover:bg-blue-700">{article.category}</Badge>
-                        <span className="text-gray-600">{article.date}</span>
-                    </div>
-
-                    {/* Title */}
-                    <h1 className="mb-6 text-2xl leading-tight font-bold text-gray-900 uppercase md:text-3xl">{article.title}</h1>
-
-                    {/* Article Content */}
-                    <div className="prose prose-lg max-w-none leading-relaxed text-gray-800" dangerouslySetInnerHTML={{ __html: article.body1 }} />
-                </div>
-
-                {/* Author and Stats */}
-                <div className="flex items-center justify-between border-t bg-gray-50 p-6">
-                    <div className="space-x-3x flex items-center">
-                        <img
-                            src={`/storage/${article.authorImage}` || '/placeholder.svg'}
-                            alt={article.author}
-                            width={30}
-                            height={30}
-                            className="rounded-full"
-                        />
-                        <span className="font-medium text-gray-700">{article.author}</span>
-                    </div>
-                    <div className="flex items-center space-x-4 text-gray-600">
-                        <div className="flex items-center space-x-1">
-                            <Eye className="h-4 w-4" />
-                            <span className="text-sm">{article.views}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                            <User className="h-4 w-4" />
-                            <span className="text-sm">{article.users}</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            {/* Tags and Share Section - Combined Card */}
-            <TagsAndShare article={article} />
-        </div>
-    );
-}
-
-function TagsAndShare({ article }: { article: Article }) {
     const { toast } = useToast();
 
     const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
@@ -116,6 +59,58 @@ function TagsAndShare({ article }: { article: Article }) {
     };
 
     return (
+        <div className="space-y-4">
+            {/* Article Card */}
+            <article className="overflow-hidden rounded-lg border bg-white shadow-sm">
+                {/* Featured Image */}
+                <div className="relative h-[400px] overflow-hidden md:h-[550px]">
+                    <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="min-w-full object-cover" />
+                </div>
+
+                {/* Article Content */}
+                <div className="p-6">
+                    {/* Category and Date */}
+                    <div className="mb-4">
+                        <Badge className="mr-3 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{article?.category?.name}</Badge>
+                        <span className="text-gray-600">{article.date}</span>
+                    </div>
+
+                    {/* Title */}
+                    <h1 className="mb-6 text-2xl leading-tight font-bold text-gray-900 uppercase md:text-3xl">{article.title}</h1>
+
+                    {/* Article Content */}
+                    <div className="prose prose-lg max-w-none leading-relaxed text-gray-800" dangerouslySetInnerHTML={{ __html: article.body1 }} />
+                </div>
+
+                {/* Author and Stats */}
+                <div className="flex items-center justify-between border-t bg-gray-50 p-6">
+                    <div className="space-x-3x flex items-center">
+                        <img
+                            src={`/storage/${article?.author?.image}` || '/placeholder.svg'}
+                            alt={article.author?.name}
+                            width={30}
+                            height={30}
+                            className="rounded-full"
+                        />
+                        <span className="ml-3 font-medium text-gray-700">{article.author?.name}</span>
+                    </div>
+                    <div className="flex items-center space-x-4 text-gray-600">
+                        <div className="flex items-center space-x-1">
+                            <Eye className="h-4 w-4" />
+                            <span className="text-sm">{article.views}</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            {/* Tags and Share Section - Combined Card */}
+            <TagsAndShare article={article} />
+        </div>
+    );
+}
+
+function TagsAndShare({ article }: { article: Article }) {
+    return (
         <Card className="gap-2 py-2">
             <CardContent className="space-y-6 p-6">
                 {/* Tags Section */}
@@ -125,18 +120,11 @@ function TagsAndShare({ article }: { article: Article }) {
                         <span className="mr-2 text-sm font-medium text-gray-600">Tags:</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        <span className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200">
-                            Koperasi
-                        </span>
-                        <span className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200">
-                            Desa
-                        </span>
-                        <span className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200">
-                            Bulukumpa
-                        </span>
-                        <span className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200">
-                            Musyawarah
-                        </span>
+                        {article.tags?.map((tag: string, index: number) => (
+                            <span className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200">
+                                {'#' + tag}
+                            </span>
+                        ))}
                     </div>
                 </div>
 

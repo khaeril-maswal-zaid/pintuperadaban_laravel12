@@ -16,23 +16,33 @@ interface Article {
 
 export function MainContent({ latestNews, categoryNews }: any) {
     const { iklans } = usePage<SharedData>().props;
-    const advertise = iklans.filter((iklan: any) => iklan.type === '1-2')[0];
+    const advNews = iklans.filter((iklan: any) => iklan.type === 'News')[0];
+    const advKategoriDeks = iklans.filter((iklan: any) => iklan.type === 'KategoriDeks')[0];
+    const advKategoriMob = iklans.filter((iklan: any) => iklan.type === 'KategoriMob')[0];
 
     const bigLatestNews = latestNews.slice(0, 2);
     const smallLatestNews = latestNews.slice(2, 4);
     const featuredOpini = categoryNews.slice(0, 1)[0];
     const allCategoryNews = categoryNews.slice(1);
 
+    function formatTanggalIndo(tanggal: any) {
+        return new Date(tanggal).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    }
+
     return (
-        <div className="space-y-8 lg:w-2/3">
+        <div className="space-y-5 lg:w-2/3">
             {/* Advertisement Banner */}
-            <img src={`storage/${advertise.image}`} className="rounded" alt="" />
+            <img src={`storage/${advNews?.image}`} className="rounded" alt="" />
 
             {/* Latest News Section */}
             <div>
-                <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900 uppercase">Latest News</h2>
-                    <a href="/category/news" className="font-medium text-yellow-400 hover:text-yellow-500">
+                <div className="mb-3 flex items-center justify-between border-l-5 border-yellow-400 bg-white p-4 shadow-sm md:mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 uppercase">Berita Peradaban</h2>
+                    <a href="/category/news" className="hover:text-yellow-500">
                         View All
                     </a>
                 </div>
@@ -50,7 +60,7 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             <div className="p-6">
                                 <div className="mb-3">
                                     <Badge className="mr-3 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{article?.category.name}</Badge>
-                                    <span className="text-sm text-gray-600">{article.created_at}</span>
+                                    <span className="text-sm text-gray-600">{formatTanggalIndo(article.created_at)}</span>
                                 </div>
                                 <a
                                     href={`/blog/${article.slug}`}
@@ -83,7 +93,7 @@ export function MainContent({ latestNews, categoryNews }: any) {
                 {/* Small News Items */}
                 <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
                     {smallLatestNews.map((item: Article) => (
-                        <article key={item.slug} className="flex h-[130px] overflow-hidden rounded-lg border bg-white shadow-sm">
+                        <article key={item.slug} className="flex h-[150px] overflow-hidden rounded-lg border bg-white shadow-sm">
                             <div className="relative w-[150px] flex-shrink-0">
                                 <img
                                     src={`/storage/${item.picture1}` || '/placeholder.svg'}
@@ -94,11 +104,11 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             <div className="flex flex-1 flex-col justify-center p-4">
                                 <div className="mb-2">
                                     <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">{item?.category.name}</Badge>
-                                    <span className="text-xs text-gray-600">{item.created_at}</span>
+                                    <span className="text-xs text-gray-600">{formatTanggalIndo(item.created_at)}</span>
                                 </div>
                                 <a
                                     href={`/blog/${item.slug}`}
-                                    className="text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
+                                    className="line-clamp-3 text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
                                     {item.title}
                                 </a>
@@ -108,30 +118,30 @@ export function MainContent({ latestNews, categoryNews }: any) {
                 </div>
             </div>
 
-            <hr className="border-gray-200" />
-
             {/* Advertisement Banner Bottom */}
             <div className="w-full">
                 <div className="mb-6 block md:hidden">
-                    <h3 className="mb-3 text-lg font-bold text-gray-900 uppercase">Advertisement</h3>
-                    <div className="rounded bg-gray-100 p-4 text-center">
-                        <span className="text-gray-600">Mobile Advertisement</span>
+                    <div className="overflow-hidden rounded-lg border bg-white">
+                        <div className="flex items-center justify-between rounded-t-lg border-b border-l-5 border-l-yellow-400 bg-white p-3">
+                            <h2 className="font-bold text-gray-900 uppercase">Advertisement</h2>
+                        </div>
+                        <div className="p-4">
+                            <img src={`storage/${advKategoriMob?.image}`} className="rounded" alt="" />
+                        </div>
                     </div>
                 </div>
                 <div className="hidden md:block">
-                    <div className="rounded bg-gray-100 p-4 text-center">
-                        <span className="text-gray-600">Desktop Advertisement Banner</span>
-                    </div>
+                    <img src={`storage/${advKategoriDeks?.image}`} className="rounded" alt="" />
                 </div>
             </div>
 
             {/* Category Section */}
             <div>
-                <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900 uppercase">Category</h2>
-                    <a href="/category/opini" className="font-medium text-yellow-400 hover:text-yellow-500">
+                <div className="mb-3 flex items-center justify-between border-l-5 border-yellow-400 bg-white p-4 shadow-sm md:mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 uppercase">Kategori</h2>
+                    {/* <a href="/category/news" className="hover:text-yellow-500">
                         View All
-                    </a>
+                    </a> */}
                 </div>
 
                 {/* Featured Opinion Article */}
@@ -148,7 +158,7 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             <div>
                                 <div className="mb-3">
                                     <Badge className="mr-3 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{featuredOpini?.category.name}</Badge>
-                                    <span className="text-sm text-gray-600">{featuredOpini?.created_at}</span>
+                                    <span className="text-sm text-gray-600">{formatTanggalIndo(featuredOpini?.created_at)}</span>
                                 </div>
                                 <a
                                     href={`/blog/${featuredOpini?.slug}`}
@@ -192,11 +202,11 @@ export function MainContent({ latestNews, categoryNews }: any) {
                             <div className="flex flex-1 flex-col justify-center p-4">
                                 <div className="mb-2">
                                     <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">{item?.category.name}</Badge>
-                                    <span className="text-xs text-gray-600">{item.created_at}</span>
+                                    <span className="text-xs text-gray-600">{formatTanggalIndo(item.created_at)}</span>
                                 </div>
                                 <a
                                     href={`/blog/${item.slug}`}
-                                    className="text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
+                                    className="line-clamp-3 text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
                                     {item.title}
                                 </a>

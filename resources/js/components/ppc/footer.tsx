@@ -1,66 +1,37 @@
 import { Badge } from '@/components/ui/badge';
+import { SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from 'lucide-react';
 
-const popularFooterPosts = [
-    {
-        title: 'Muhammadiyah Bulukumba Pusatka',
-        category: 'Sosial',
-        date: '29 Maret 2025',
-        href: '/article/muhammadiyah-bulukumba',
-    },
-    {
-        title: 'Memaknai Humanisme Dalam Konte',
-        category: 'Teologi',
-        date: '27 Mei 2022',
-        href: '/article/memaknai-humanisme',
-    },
-    {
-        title: 'MTQ ke-XVIII Desa Bulo-Bulo Re',
-        category: 'Teologi',
-        date: '16 Maret 2025',
-        href: '/article/mtq-ke-xviii',
-    },
-];
-
-const categories = [
-    { name: 'Teologi', href: '/category/teologi' },
-    { name: 'Filsafat', href: '/category/filsafat' },
-    { name: 'Ekonomi', href: '/category/ekonomi' },
-    { name: 'Sosial', href: '/category/sosial' },
-    { name: 'Politik', href: '/category/politik' },
-    { name: 'News', href: '/category/news' },
-    { name: 'Opini', href: '/category/opini' },
-    { name: 'The-Story', href: '/category/the_story' },
-    { name: 'Pendidikan', href: '/category/pendidikan' },
-];
-
 export function Footer() {
+    const { mains, categories, kontaks } = usePage<SharedData>().props;
+
     return (
         <footer className="mt-12 bg-gray-900 text-white">
             <div className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {/* Contact Info */}
                     <div>
-                        <h3 className="mb-4 text-lg font-bold uppercase">Get In Touch</h3>
+                        <h3 className="mb-4 text-lg font-bold uppercase">Hubungi Kami</h3>
                         <div className="mb-6 space-y-3">
                             <div className="flex items-start space-x-3">
                                 <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-yellow-400" />
-                                <span className="text-sm">Berdikari C, Jln. Ahmad Yani, Bulukumba</span>
+                                <span className="text-sm">{kontaks?.alamat?.value}</span>
                             </div>
                             <div className="flex items-center space-x-3">
                                 <Phone className="h-5 w-5 flex-shrink-0 text-yellow-400" />
-                                <span className="text-sm">62 853-4365-2494 / 62 853-4043-4280</span>
+                                <span className="text-sm">{kontaks?.telepon?.value}</span>
                             </div>
                             <div className="flex items-center space-x-3">
                                 <Mail className="h-5 w-5 flex-shrink-0 text-yellow-400" />
-                                <span className="text-sm">official@pintuperadaban.com</span>
+                                <span className="text-sm">{kontaks?.email?.value}</span>
                             </div>
                         </div>
 
-                        <h4 className="text-md mb-3 font-bold uppercase">Follow Us</h4>
+                        <h4 className="text-md mb-3 font-bold uppercase">Ikuti Kami</h4>
                         <div className="flex space-x-2">
                             <a
-                                href="https://web.facebook.com/profile.php?id=100083999477470"
+                                href={kontaks?.fb?.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded bg-gray-700 transition-colors hover:bg-yellow-500"
@@ -68,7 +39,7 @@ export function Footer() {
                                 <Facebook className="h-5 w-5 text-yellow-400" />
                             </a>
                             <a
-                                href="https://web.facebook.com/profile.php?id=100083999477470"
+                                href={kontaks?.x?.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded bg-gray-700 transition-colors hover:bg-sky-500"
@@ -76,7 +47,7 @@ export function Footer() {
                                 <Twitter className="h-5 w-5 text-yellow-400" />
                             </a>
                             <a
-                                href="https://web.facebook.com/profile.php?id=100083999477470"
+                                href={kontaks?.ig?.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded bg-gray-700 transition-colors hover:bg-pink-600"
@@ -84,7 +55,7 @@ export function Footer() {
                                 <Instagram className="h-5 w-5 text-yellow-400" />
                             </a>
                             <a
-                                href="https://web.facebook.com/profile.php?id=100083999477470"
+                                href={kontaks?.yt?.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded bg-gray-700 transition-colors hover:bg-red-600"
@@ -96,15 +67,18 @@ export function Footer() {
 
                     {/* Popular Posts */}
                     <div>
-                        <h3 className="mb-4 text-lg font-bold uppercase">Popular Peradaban</h3>
+                        <h3 className="mb-4 text-lg font-bold uppercase">Peradaban Utama</h3>
                         <div className="space-y-4">
-                            {popularFooterPosts.map((post, index) => (
+                            {mains.map((post: any, index: any) => (
                                 <article key={index}>
                                     <div className="mb-2">
-                                        <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">{post.category}</Badge>
+                                        <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">{post?.category.name}</Badge>
                                         <span className="text-xs text-gray-400">{post.date}</span>
                                     </div>
-                                    <a href={post.href} className="text-sm font-medium text-gray-300 uppercase transition-colors hover:text-white">
+                                    <a
+                                        href={post.slug}
+                                        className="line-clamp-1 text-sm font-medium text-gray-300 uppercase transition-colors hover:text-white"
+                                    >
                                         {post.title}
                                     </a>
                                 </article>
@@ -114,11 +88,11 @@ export function Footer() {
 
                     {/* Categories */}
                     <div>
-                        <h3 className="mb-4 text-lg font-bold uppercase">Categories</h3>
+                        <h3 className="mb-4 text-lg font-bold uppercase">Kategori</h3>
                         <div className="flex flex-wrap gap-2">
-                            {categories.map((category) => (
+                            {categories.map((category: any, index: any) => (
                                 <a
-                                    key={category.name}
+                                    key={category.name || index}
                                     href={category.href}
                                     className="rounded bg-gray-700 px-3 py-1 text-sm transition-colors hover:bg-gray-600"
                                 >
@@ -131,20 +105,17 @@ export function Footer() {
             </div>
 
             {/* Copyright */}
-            <div className="bg-black py-4">
-                <div className="container mx-auto px-4">
-                    <p className="text-center text-sm text-gray-400">
+            <footer className="border-t border-gray-800 bg-black">
+                <div className="container mx-auto px-6 py-4">
+                    <p className="text-center text-xs tracking-wide text-gray-400 transition-colors duration-300 hover:text-gray-200">
                         &copy;{' '}
-                        <a href="/" className="transition-colors hover:text-white">
-                            Pintu Peradaban.Com
-                        </a>
-                        . All Rights Reserved. Design by{' '}
-                        <a href="https://htmlcodex.com" className="transition-colors hover:text-white">
-                            HTML Codex
-                        </a>
+                        <a href="/" className="font-medium text-gray-300 transition-colors duration-300 hover:text-white">
+                            PintuPeradaban.com
+                        </a>{' '}
+                        · All rights reserved · Developed by <span className="font-semibold text-gray-300">AlZaid Webcrafters</span> (System & Design)
                     </p>
                 </div>
-            </div>
+            </footer>
         </footer>
     );
 }

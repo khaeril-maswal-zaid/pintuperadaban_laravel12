@@ -2,7 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Blog;
+use App\Models\CategoryArticle;
 use App\Models\Iklan;
+use App\Models\Kontak;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -40,6 +43,16 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $labels = ['fb', 'ig', 'x', 'yt', 'telepon', 'email', 'alamat'];
+        $kontaks = [];
+        foreach ($labels as $label) {
+            $kontaks[$label] = Kontak::select(['name', 'value', 'link'])
+                ->where('label', $label)
+                ->where('status', 'aktif')
+                ->first();
+        }
+
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -52,7 +65,18 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'iklans' => Iklan::all()
+            'iklans' => Iklan::all(),
+            'popularPosts' => (new Blog())->populer(),
+            'mains' => Blog::select(['id', 'title', 'slug', 'category_articles_id',])
+                ->with(['category', 'author'])
+                ->where('level', 'main')
+                ->latest()
+                ->take(3)
+                ->get(),
+            'categories' => CategoryArticle::select(['slug', 'name'])
+                ->orderBy('name')
+                ->get(),
+            'kontaks' => $kontaks
         ];
     }
 }

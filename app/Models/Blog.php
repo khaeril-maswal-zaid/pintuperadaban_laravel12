@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -44,5 +45,17 @@ class Blog extends Model
     public function views(): HasMany
     {
         return $this->hasMany(NewsViews::class);
+    }
+
+    public function populer()
+    {
+        $populer = $this->select(['slug', 'title', 'picture1', 'category_articles_id',  'user_id', 'views', 'created_at'])
+            // ->where('created_at', '>=', Carbon::now()->subDays(70))
+            ->with(['category', 'author'])
+            ->orderByDesc('views')
+            ->take(5)
+            ->get();
+
+        return $populer;
     }
 }

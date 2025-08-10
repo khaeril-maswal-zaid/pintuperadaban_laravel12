@@ -32,6 +32,14 @@ export function HeroCarousel({ featuredArticles, sideArticles }: any) {
         setCurrentSlide((prev) => (prev - 1 + featuredArticles.length) % featuredArticles.length);
     };
 
+    function formatTanggalIndo(tanggal: any) {
+        return new Date(tanggal).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    }
+
     return (
         <div className="container mx-auto">
             <div className="flex flex-col lg:flex-row">
@@ -53,8 +61,8 @@ export function HeroCarousel({ featuredArticles, sideArticles }: any) {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute right-0 bottom-0 left-0 p-6 text-white">
                                     <div className="mb-4">
-                                        <Badge className="mr-4 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{article?.category.name}</Badge>
-                                        <span className="text-sm">{article.created_at}</span>
+                                        <Badge className="mr-3 bg-yellow-400 text-gray-900 hover:bg-yellow-500">{article?.category.name}</Badge>
+                                        <span className="text-sm">{formatTanggalIndo(article.created_at)}</span>
                                     </div>
                                     <a
                                         href={`/blog/${article.slug}`}
@@ -113,7 +121,7 @@ export function HeroCarousel({ featuredArticles, sideArticles }: any) {
                                         <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">
                                             {article?.category.name}
                                         </Badge>
-                                        <span className="text-xs">{article.created_at}</span>
+                                        <span className="text-xs">{formatTanggalIndo(article.created_at)}</span>
                                     </div>
                                     <a
                                         href={`/blog/${article.slug}`}

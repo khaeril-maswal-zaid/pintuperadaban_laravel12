@@ -93,6 +93,8 @@ class BlogController extends Controller
      */
     public function show(Blog $blog)
     {
+        $blog->load(['author', 'category']);
+
         // 2️ Buat cache key
         $cacheKey = 'viewed_' . $blog->id . '_' . request()->ip();
 
@@ -200,19 +202,11 @@ class BlogController extends Controller
             }
         }
 
-        $populer = Blog::select(['slug', 'title', 'picture1', 'category_articles_id',  'user_id', 'views', 'created_at'])
-            ->with(['category', 'author'])
-            ->orderByDesc('views')
-            ->take(5)
-            ->get();
-
-
         $data = [
             'mainBlog' => $mainBlog,
             'generalBlog' => $generalBlog,
             'latestBlog' => $latestBlog,
             'categorizedBlog' => $categorizedBlog, // hasil: 1 per kategori
-            'populer' => $populer,
         ];
 
         return Inertia::render('ppc/page', $data);

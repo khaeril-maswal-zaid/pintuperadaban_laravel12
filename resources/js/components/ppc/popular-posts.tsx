@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { usePage } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -57,7 +58,9 @@ const popularPosts: PopularPost[] = [
     },
 ];
 
-export function PopularPosts({ popularPosts }: any) {
+export function PopularPosts() {
+    const { popularPosts } = usePage().props;
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [itemsPerView, setItemsPerView] = useState(4);
 
@@ -89,11 +92,19 @@ export function PopularPosts({ popularPosts }: any) {
         setCurrentIndex((prev) => Math.max(prev - 1, 0));
     };
 
+    function formatTanggalIndo(tanggal: any) {
+        return new Date(tanggal).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    }
+
     return (
-        <div className="bg-gray-50 py-8">
+        <div className="mb-7 bg-gray-50 py-8">
             <div className="container mx-auto px-4">
                 <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900 uppercase">Popular Posts</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 uppercase">Peradaban Popular</h2>
                     <div className="flex space-x-2">
                         <Button variant="outline" size="sm" onClick={prevSlide} disabled={currentIndex === 0}>
                             <ChevronLeft className="h-4 w-4" />
@@ -115,7 +126,7 @@ export function PopularPosts({ popularPosts }: any) {
                             <div key={post.slug} className="flex-shrink-0 px-2" style={{ width: `${100 / itemsPerView}%` }}>
                                 <div className="group relative h-[300px] overflow-hidden rounded-lg">
                                     <img
-                                        src={`/storage/${post?.picture1}` || '/placeholder.svg'}
+                                        src={`/storage/${post.picture1}`}
                                         alt={post.title}
                                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                                     />
@@ -125,7 +136,7 @@ export function PopularPosts({ popularPosts }: any) {
                                             <Badge className="mr-2 bg-yellow-400 text-xs text-gray-900 hover:bg-yellow-500">
                                                 {post?.category?.name}
                                             </Badge>
-                                            <span className="text-xs">{post.created_at}</span>
+                                            <span className="text-xs">{formatTanggalIndo(post.created_at)}</span>
                                         </div>
                                         <a
                                             href={`/blog/${post.slug}`}
