@@ -43,8 +43,6 @@ type ValidationErrors = {
 export default function BlogPostModal() {
     const { auth, categories } = usePage().props;
 
-    console.log(categories);
-
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -293,18 +291,20 @@ export default function BlogPostModal() {
 
         // Validate form
         const isValid = validateForm();
-        if (!isValid) {
-            setIsSubmitting(false);
-            return;
-        }
+        console.log({ isValid });
+
+        // if (!isValid) {
+        //     setIsSubmitting(false);
+        //     return;
+        // }
 
         router.post(
             route('blog.store'),
             {
                 title,
                 description,
-                body1, // This will contain HTML from the rich text editor
-                body2, // This will contain HTML from the rich text editor
+                body1,
+                body2,
                 mainImage,
                 subImage1,
                 tags,

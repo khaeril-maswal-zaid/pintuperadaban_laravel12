@@ -102,6 +102,14 @@ class BlogController extends Controller
      */
     public function show(Blog $blog)
     {
+        $ogTags = [
+            'title' => $blog->title,
+            'description' => Str::limit(strip_tags($blog->excerpt), 200),
+            'image' => asset('/storage/' . $blog->picture1),
+            'url' => route('blog.show', $blog),
+        ];
+        request()->attributes->set('og', $ogTags);
+
         $blog->load(['author', 'category']);
 
         // 2️ Buat cache key
