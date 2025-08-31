@@ -30,7 +30,7 @@
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Pintu Peradaban.Com') }}</title>
 
         <link rel="icon" href="/image/assets/pp.png" sizes="any">
         <link rel="icon" href="/image/assets/pp.png" type="image/svg+xml">
