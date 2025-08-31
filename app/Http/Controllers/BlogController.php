@@ -106,7 +106,7 @@ class BlogController extends Controller
             'title' => $blog->title,
             'description' => Str::limit(strip_tags($blog->excerpt), 200),
             'image' => asset('/storage/' . $blog->picture1),
-            'url' => route('blog.show', $blog),
+            'url' => route('show', $blog),
         ];
         request()->attributes->set('og', $ogTags);
 
