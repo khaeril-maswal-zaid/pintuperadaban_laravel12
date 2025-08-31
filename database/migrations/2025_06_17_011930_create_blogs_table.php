@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('slug')->unique();
             $table->string('title');
-            $table->string('excerpt');
+            $table->text('excerpt');
             $table->text('body1');
             $table->text('body2');
             $table->string('picture1')->default('default.png');

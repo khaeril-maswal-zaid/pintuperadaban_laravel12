@@ -34,12 +34,12 @@ export default function ArticlePage({ articleData, latestBlog }: any) {
                                             <h2 className="font-bold text-gray-900 uppercase">Advertisement</h2>
                                         </div>
                                         <div className="p-4">
-                                            <img src={`storage/${advShowDeks?.image}`} className="rounded" alt="" />
+                                            <img src={`/storage/${advShowDeks?.image}`} className="rounded" alt="" />
                                         </div>
                                     </div>
                                 </div>
                                 <div className="hidden md:block">
-                                    <img src={`storage/${advShowMob?.image}`} className="rounded" alt="" />
+                                    <img src={`/storage/${advShowMob?.image}`} className="rounded" alt="" />
                                 </div>
                             </div>
 

@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,19 +14,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Official Pintu Peradaban',
-            'email' => 'official@pintuperadaban.com',
-            'image' => 'image/assets/pp.png',
-            'password' => 'PpcAdmin@2025',
-        ]);
-
         $this->call([
+            UserSeeder::class,
             CategoryArticleSeeder::class,
             IklanSeeder::class,
-            KontakSeeder::class
+            KontakSeeder::class,
         ]);
     }
 }

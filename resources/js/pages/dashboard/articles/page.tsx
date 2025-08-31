@@ -1,10 +1,18 @@
 import { ArticlesManagement } from '@/components/dashboard/articles-management';
-import { AdminLayout } from '@/layouts/dashboard-layout';
+import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem } from '@/types';
 
-export default function ArticlesPage() {
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/dashboard',
+    },
+];
+
+export default function ArticlesPage({ blogs }: any) {
     return (
-        <AdminLayout>
-            <ArticlesManagement />
-        </AdminLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <ArticlesManagement mockArticles={blogs} />
+        </AppLayout>
     );
 }

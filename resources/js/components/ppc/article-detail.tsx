@@ -12,10 +12,12 @@ interface Article {
     category: any;
     date: string;
     picture1: string;
+    picture2: string;
     author: any;
     authorImage: string;
     views: number;
     body1: string;
+    body2: string;
 }
 
 interface ArticleDetailProps {
@@ -63,7 +65,7 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
             {/* Article Card */}
             <article className="overflow-hidden rounded-lg border bg-white shadow-sm">
                 {/* Featured Image */}
-                <div className="relative h-[400px] overflow-hidden md:h-[550px]">
+                <div className="relative overflow-hidden md:h-[550px]">
                     <img src={`/storage/${article.picture1}` || '/placeholder.svg'} alt={article.title} className="min-w-full object-cover" />
                 </div>
 
@@ -80,6 +82,12 @@ export function ArticleDetail({ article }: ArticleDetailProps) {
 
                     {/* Article Content */}
                     <div className="prose prose-lg max-w-none leading-relaxed text-gray-800" dangerouslySetInnerHTML={{ __html: article.body1 }} />
+                    <img
+                        src={`/storage/${article.picture2}` || '/placeholder.svg'}
+                        alt={article.title}
+                        className="min-h-full min-w-full object-cover"
+                    />
+                    <div className="prose prose-lg max-w-none leading-relaxed text-gray-800" dangerouslySetInnerHTML={{ __html: article.body2 }} />
                 </div>
 
                 {/* Author and Stats */}
@@ -121,7 +129,10 @@ function TagsAndShare({ article }: { article: Article }) {
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {article.tags?.map((tag: string, index: number) => (
-                            <span className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200">
+                            <span
+                                key={index}
+                                className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200"
+                            >
                                 {'#' + tag}
                             </span>
                         ))}

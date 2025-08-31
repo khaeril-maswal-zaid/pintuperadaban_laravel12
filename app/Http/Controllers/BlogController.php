@@ -20,7 +20,16 @@ class BlogController extends Controller
      */
     public function index(): Response
     {
-        return Inertia::render('dashboard/articles/page');
+        $data = [
+            'blogs' => Blog::select(['id', 'slug', 'title', 'excerpt', 'picture1', 'category_articles_id', 'user_id', 'views', 'created_at'])
+                ->with('category')
+                ->with('author')
+                ->where('user_id', Auth::id())
+                ->latest()
+                ->paginate(10)
+                ->withQueryString(),
+        ];
+        return Inertia::render('dashboard/articles/page', $data);
     }
 
     /**
@@ -152,6 +161,10 @@ class BlogController extends Controller
 
     function home(): Response
     {
+        // $blog = new Blog();
+        // $blog->import();
+        // die('Selesai');
+
         $mainBlog = Blog::select(['slug', 'title', 'picture1', 'category_articles_id', 'created_at'])
             ->where('level', 'main')
             ->with('category')
@@ -210,5 +223,20 @@ class BlogController extends Controller
         ];
 
         return Inertia::render('ppc/page', $data);
+    }
+
+    public function card($category)
+    {
+        return Inertia::render('ppc/category/page', [
+
+            'allArticles' => Blog::with(['category:id,slug'])
+                ->whereHas('category', function ($q) use ($category) {
+                    $q->where('slug', $category);
+                })
+                ->select('id', 'title', 'picture1', 'slug', 'category_articles_id', 'user_id', 'excerpt', 'views', 'created_at')
+                ->with(['category', 'author'])
+                ->latest()
+                ->paginate(6)
+        ]);
     }
 }

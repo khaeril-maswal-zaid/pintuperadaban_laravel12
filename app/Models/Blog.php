@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Blog extends Model
 {
@@ -57,5 +58,35 @@ class Blog extends Model
             ->get();
 
         return $populer;
+    }
+
+    function import()
+    {
+        $datas = require database_path("artikel.php");
+
+        $this->query()->delete();
+        DB::statement('ALTER TABLE blogs AUTO_INCREMENT = 1');
+
+        $artikel = [];
+        foreach ($datas as $key => $data) {
+            $artikel[] = [
+                'user_id' =>  $data['oleh'],
+                'slug' => $data['slug'],
+                'title' => $data['judul'],
+                'excerpt' => $data['description'],
+                'body1' => $data['artikel'],
+                'body2' => '',
+                'picture1' => $data['picture'],
+                'picture2' => '',
+                'tags' => json_encode(['']),
+                'category_articles_id' =>  $data['kategori'],
+                'level' => $data['level'],
+                'views' => $data['view'],
+                'created_at' => Carbon::parse($data['tanggal'] . ' ' . $data['waktu']),
+                'updated_at' => now(),
+            ];
+        }
+
+        $this->insert($artikel);
     }
 }

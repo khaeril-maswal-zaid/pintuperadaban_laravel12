@@ -26,7 +26,10 @@ const blogPostSchema = z.object({
     description: z.string().min(10, 'Deskripsi harus terdiri dari minimal 10 karakter').max(255, 'Deskripsi tidak boleh lebih dari 255 karakter'),
     body1: z.string().min(20, 'Konten utama harus terdiri dari minimal 20 karakter'),
     body2: z.string().optional(),
-    category: z.string().nonempty('Kategori wajib dipilih'),
+    category: z.number({
+        required_error: 'Kategori wajib dipilih',
+        invalid_type_error: 'Kategori harus berupa angka',
+    }),
     tags: z.array(z.string()).min(1, 'Minimal 1 tag harus dipilih').max(5, 'Maksimal 5 tag yang diperbolehkan'),
     // mainImage: z.any().refine((file) => file instanceof File, { message: 'Gambar utama wajib diunggah' }),
     mainImage: z.any().optional(),
@@ -38,7 +41,9 @@ type ValidationErrors = {
 };
 
 export default function BlogPostModal() {
-    const { auth } = usePage().props;
+    const { auth, categories } = usePage().props;
+
+    console.log(categories);
 
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
@@ -539,7 +544,7 @@ export default function BlogPostModal() {
 
                                                         <div className="space-y-2">
                                                             <Label htmlFor="subImage1" className="text-xs text-gray-500">
-                                                                Sub Image (optional)
+                                                                Sub Image <span className="text-red-500">*</span>
                                                             </Label>
                                                             <div className="flex flex-col items-center">
                                                                 <div
@@ -623,21 +628,11 @@ export default function BlogPostModal() {
                                                             <SelectValue placeholder="Pilih kategori" />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem className="transition-none hover:bg-muted" value="News">
-                                                                News
-                                                            </SelectItem>
-                                                            <SelectItem className="transition-none hover:bg-muted" value="Opini">
-                                                                Opini
-                                                            </SelectItem>
-                                                            <SelectItem className="transition-none hover:bg-muted" value="Aspirasi">
-                                                                Aspirasi
-                                                            </SelectItem>
-                                                            <SelectItem className="transition-none hover:bg-muted" value="Edukasi Politik">
-                                                                Edukasi Politik
-                                                            </SelectItem>
-                                                            <SelectItem className="transition-none hover:bg-muted" value="Inspirasi">
-                                                                Inspirasi
-                                                            </SelectItem>
+                                                            {categories.map((cat: any) => (
+                                                                <SelectItem key={cat?.name} value={cat?.id}>
+                                                                    {cat?.name}
+                                                                </SelectItem>
+                                                            ))}
                                                         </SelectContent>
                                                     </Select>
                                                     {errors.category && <p className="text-xs text-destructive">{errors.category}</p>}

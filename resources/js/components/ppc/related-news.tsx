@@ -37,11 +37,11 @@ export function RelatedNews({ latestBlog }: any) {
             {relatedArticles && (
                 <article key={relatedArticles?.id} className="overflow-hidden rounded-lg border bg-white shadow-sm">
                     <div className="flex flex-col md:flex-row">
-                        <div className="relative h-[300px] md:h-[360px] md:w-1/2">
+                        <div className="relative h-[280px] md:h-[360px] md:w-1/2">
                             <img
                                 src={`/storage/${relatedArticles?.picture1}` || '/placeholder.svg'}
                                 alt={relatedArticles?.title}
-                                className="object-cover"
+                                className="min-h-full object-cover"
                             />
                         </div>
                         <div className="flex flex-col justify-between p-6 md:w-1/2">

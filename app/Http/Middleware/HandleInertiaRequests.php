@@ -73,7 +73,7 @@ class HandleInertiaRequests extends Middleware
                 ->latest()
                 ->take(3)
                 ->get(),
-            'categories' => CategoryArticle::select(['slug', 'name'])
+            'categories' => CategoryArticle::select(['slug', 'name', 'id'])
                 ->orderBy('name')
                 ->get(),
             'kontaks' => $kontaks

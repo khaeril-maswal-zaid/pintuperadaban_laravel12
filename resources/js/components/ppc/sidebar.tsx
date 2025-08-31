@@ -39,10 +39,10 @@ export function Sidebar() {
                 </div>
                 <div className="p-4 text-center">
                     <div className="hidden md:block">
-                        <img src={`storage/${advSidebarDeks?.image}`} className="rounded" alt="" />
+                        <img src={`/storage/${advSidebarDeks?.image}`} className="rounded" alt="" />
                     </div>
                     <div className="block md:hidden">
-                        <img src={`storage/${advSidebarMob?.image}`} className="rounded" alt="" />
+                        <img src={`/storage/${advSidebarMob?.image}`} className="rounded" alt="" />
                     </div>
                 </div>
             </div>
@@ -109,7 +109,11 @@ export function Sidebar() {
                     {popularPosts.map((post: any, index: any) => (
                         <article key={post.id || index} className="flex h-[110px] bg-white">
                             <div className="relative w-[150px] flex-shrink-0">
-                                <img src={`/storage/${post.picture1}` || '/placeholder.svg'} alt={post.title} className="rounded object-cover" />
+                                <img
+                                    src={`/storage/${post.picture1}` || '/placeholder.svg'}
+                                    alt={post.title}
+                                    className="min-h-full rounded object-cover"
+                                />
                             </div>
                             <div className="flex flex-1 flex-col justify-center pl-3">
                                 <div className="mb-2">
@@ -117,7 +121,7 @@ export function Sidebar() {
                                     <span className="text-xs text-gray-600">{formatTanggalIndo(post.created_at)}</span>
                                 </div>
                                 <a
-                                    href={post.slug}
+                                    href={`/blog/${post.slug}`}
                                     className="line-clamp-2 text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-500"
                                 >
                                     {post.title}
