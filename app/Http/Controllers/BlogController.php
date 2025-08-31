@@ -69,8 +69,8 @@ class BlogController extends Controller
 
         $mainPath1 = "image/blog/{$filename1}";
 
-        $body1 = str_replace('<p>', '<p class="mb-3">', $request->body1);
-        $body2 = str_replace('<p>', '<p class="mb-3">', $request->body2);
+        $body1 = str_replace('<p>', '<p class="mb-2">', $request->body1);
+        $body2 = str_replace('<p>', '<p class="mb-2">', $request->body2);
 
         Blog::create([
             'user_id' => Auth::id(),
