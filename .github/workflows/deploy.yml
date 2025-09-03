@@ -1,0 +1,36 @@
+name: Deploy React Build to Shared Hosting
+
+on:
+  push:
+    branches:
+      - main # atau 'master', tergantung branch utama kamu
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22 # sesuaikan dengan versi node kamu
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React project
+        run: npm run build
+
+      - name: Deploy via rsync over SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+          rsync -avz -e "ssh -i private_key.pem -o StrictHostKeyChecking=no -p 65002" \
+            public/build/ \
+            ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/u446959717/domains/pintuperadaban.com/public_html/build/
+
+        shell: bash
