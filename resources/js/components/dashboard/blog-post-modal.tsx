@@ -291,12 +291,11 @@ export default function BlogPostModal() {
 
         // Validate form
         const isValid = validateForm();
-        console.log({ isValid });
 
-        // if (!isValid) {
-        //     setIsSubmitting(false);
-        //     return;
-        // }
+        if (!isValid) {
+            setIsSubmitting(false);
+            return;
+        }
 
         router.post(
             route('blog.store'),
@@ -461,156 +460,155 @@ export default function BlogPostModal() {
                                             </div>
 
                                             {/* Right column - Images */}
-<div className="space-y-6">
-  <div className="space-y-2">
-    <Label className="text-sm font-medium">Images (4:3 landscape ratio)</Label>
-    <div className="grid grid-cols-1 gap-4">
-      {/* Main Image */}
-      <div className="space-y-2">
-        <Label
-          htmlFor="mainImage"
-          className={cn('text-xs text-gray-500', errors.mainImage && 'text-destructive')}
-        >
-          Main Image <span className="text-red-500">*</span>
-        </Label>
-        <div className="flex flex-col items-center">
-          <div
-            className={cn(
-              'flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 transition-colors hover:border-primary/50',
-              mainImage ? 'border-primary' : 'border-gray-300',
-              errors.mainImage && !mainImage && 'border-destructive',
-            )}
-            onClick={() => document.getElementById('mainImage')?.click()}
-          >
-            {mainImage ? (
-              <div className="relative h-full w-full">
-                <img
-                  src={mainImage || '/placeholder.svg'}
-                  alt="Main preview"
-                  className="h-full w-full rounded-md object-cover"
-                  style={{ aspectRatio: `${aspectRatio}`, objectFit: 'cover' }}
-                />
-                <div className="absolute top-1 right-1 flex gap-1">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    className="h-6 w-6 bg-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSrc(mainImage);
-                      setImageType('main');
-                      setCropDialogOpen(true);
-                    }}
-                  >
-                    <CropIcon className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMainImage('');
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <Upload className="mb-2 h-8 w-8 text-gray-400" />
-                <p className="text-xs text-gray-500">Upload main image (required)</p>
-                <p className="text-[10px] text-gray-400">
-                  Max size: 2MB • Allowed types: JPG, PNG, WEBP
-                </p>
-              </>
-            )}
-          </div>
-          <Input
-            id="mainImage"
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => onSelectFile(e, 'main')}
-            required
-            className="hidden"
-          />
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-medium">Images</Label>
+                                                    <div className="grid grid-cols-1 gap-4">
+                                                        {/* Main Image */}
+                                                        <div className="space-y-2">
+                                                            <Label
+                                                                htmlFor="mainImage"
+                                                                className={cn('text-xs text-gray-500', errors.mainImage && 'text-destructive')}
+                                                            >
+                                                                Main Image <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <div className="flex flex-col items-center">
+                                                                <div
+                                                                    className={cn(
+                                                                        'flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 transition-colors hover:border-primary/50',
+                                                                        mainImage ? 'border-primary' : 'border-gray-300',
+                                                                        errors.mainImage && !mainImage && 'border-destructive',
+                                                                    )}
+                                                                    onClick={() => document.getElementById('mainImage')?.click()}
+                                                                >
+                                                                    {mainImage ? (
+                                                                        <div className="relative h-full w-full">
+                                                                            <img
+                                                                                src={mainImage || '/placeholder.svg'}
+                                                                                alt="Main preview"
+                                                                                className="h-full w-full rounded-md object-cover"
+                                                                                style={{ aspectRatio: `${aspectRatio}`, objectFit: 'cover' }}
+                                                                            />
+                                                                            <div className="absolute top-1 right-1 flex gap-1">
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="secondary"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6 bg-white"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setSrc(mainImage);
+                                                                                        setImageType('main');
+                                                                                        setCropDialogOpen(true);
+                                                                                    }}
+                                                                                >
+                                                                                    <CropIcon className="h-3 w-3" />
+                                                                                </Button>
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="destructive"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setMainImage('');
+                                                                                    }}
+                                                                                >
+                                                                                    <X className="h-3 w-3" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                                                                            <p className="text-xs text-gray-500">Upload main image (required)</p>
+                                                                            <p className="text-[10px] text-gray-400">
+                                                                                Max size: 510 KB • Allowed types: JPG, PNG • Ratio 4:3 (landscape)
+                                                                            </p>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <Input
+                                                                    id="mainImage"
+                                                                    type="file"
+                                                                    accept="image/png,image/jpeg,image/webp"
+                                                                    onChange={(e) => onSelectFile(e, 'main')}
+                                                                    required
+                                                                    className="hidden"
+                                                                />
 
-          {errors.mainImage && !mainImage && (
-            <p className="mt-1 text-xs text-destructive">{errors.mainImage}</p>
-          )}
-        </div>
-      </div>
+                                                                {errors.mainImage && !mainImage && (
+                                                                    <p className="mt-1 text-xs text-destructive">{errors.mainImage}</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
 
-      {/* Sub Image */}
-      <div className="space-y-2">
-        <Label htmlFor="subImage1" className="text-xs text-gray-500">
-          Sub Image <span className="text-red-500">*</span>
-        </Label>
-        <div className="flex flex-col items-center">
-          <div
-            className={cn(
-              'flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 transition-colors hover:border-primary/50',
-              subImage1 ? 'border-primary' : 'border-gray-300',
-            )}
-            onClick={() => document.getElementById('subImage1')?.click()}
-          >
-            {subImage1 ? (
-              <div className="relative h-full w-full">
-                <img
-                  src={subImage1 || '/placeholder.svg'}
-                  alt="Sub image 1 preview"
-                  className="h-full w-full rounded-md object-cover"
-                  style={{ aspectRatio: `${aspectRatio}`, objectFit: 'cover' }}
-                />
-                <div className="absolute top-1 right-1 flex gap-1">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    className="h-6 w-6 bg-white"
-                  >
-                    <CropIcon className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSubImage1('');
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <Upload className="mb-1 h-6 w-6 text-gray-400" />
-                <p className="text-xs text-gray-500">Upload sub image 1</p>
-                <p className="text-[10px] text-gray-400">
-                  Max size: 2MB • Allowed types: JPG, PNG, WEBP
-                </p>
-              </>
-            )}
-          </div>
-          <Input
-            id="subImage1"
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => onSelectFile(e, 'sub1')}
-            className="hidden"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
+                                                        {/* Sub Image */}
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="subImage1" className="text-xs text-gray-500">
+                                                                Sub Image <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <div className="flex flex-col items-center">
+                                                                <div
+                                                                    className={cn(
+                                                                        'flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 transition-colors hover:border-primary/50',
+                                                                        subImage1 ? 'border-primary' : 'border-gray-300',
+                                                                    )}
+                                                                    onClick={() => document.getElementById('subImage1')?.click()}
+                                                                >
+                                                                    {subImage1 ? (
+                                                                        <div className="relative h-full w-full">
+                                                                            <img
+                                                                                src={subImage1 || '/placeholder.svg'}
+                                                                                alt="Sub image 1 preview"
+                                                                                className="h-full w-full rounded-md object-cover"
+                                                                                style={{ aspectRatio: `${aspectRatio}`, objectFit: 'cover' }}
+                                                                            />
+                                                                            <div className="absolute top-1 right-1 flex gap-1">
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="secondary"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6 bg-white"
+                                                                                >
+                                                                                    <CropIcon className="h-3 w-3" />
+                                                                                </Button>
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="destructive"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setSubImage1('');
+                                                                                    }}
+                                                                                >
+                                                                                    <X className="h-3 w-3" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Upload className="mb-1 h-6 w-6 text-gray-400" />
+                                                                            <p className="text-xs text-gray-500">Upload sub image 1</p>
+                                                                            <p className="text-[10px] text-gray-400">
+                                                                                Max size: 510 KB • Allowed types: JPG, PNG • Ratio 4:3 (landscape)
+                                                                            </p>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <Input
+                                                                    id="subImage1"
+                                                                    type="file"
+                                                                    accept="image/png,image/jpeg,image/webp"
+                                                                    onChange={(e) => onSelectFile(e, 'sub1')}
+                                                                    className="hidden"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </TabsContent>
 
