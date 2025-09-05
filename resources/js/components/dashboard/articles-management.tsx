@@ -189,9 +189,9 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                                                         <Edit className="mr-2 h-4 w-4" />
                                                         Edit
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => toggleFeatured(article.id)}>
+                                                    {/* <DropdownMenuItem onClick={() => toggleFeatured(article.id)}>
                                                         {article.featured ? 'Remove from Featured' : 'Mark as Featured'}
-                                                    </DropdownMenuItem>
+                                                    </DropdownMenuItem> */}
                                                     <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(article.id)}>
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Delete
