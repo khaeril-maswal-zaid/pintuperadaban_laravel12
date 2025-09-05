@@ -18,8 +18,9 @@ jobs:
         with:
           node-version: 22 # sesuaikan dengan versi node kamu
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies  
+        run: npm i --legacy-peer-deps
+
 
       - name: Build React project
         run: npm run build
