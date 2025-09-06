@@ -13,8 +13,8 @@ import BlogPostModal from './blog_post_modal_edit';
 interface Article {
     id: number;
     title: string;
-    author: string;
-    category: string;
+    author: any;
+    category: any;
     status: 'published' | 'draft';
     created_at: string;
     views: number;
@@ -24,8 +24,9 @@ interface Article {
     tags: string;
 }
 
-export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] }) {
-    const [articles, setArticles] = useState(mockArticles);
+export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] | { data: Article[] } }) {
+    const [articles, setArticles] = useState<Article[]>(Array.isArray(mockArticles) ? mockArticles : (mockArticles?.data ?? []));
+
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,31 +34,22 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
     const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
     const { toast } = useToast();
 
-    const filteredArticles = articles.data.filter((article) => {
+    const filteredArticles = articles.filter((article) => {
         const matchesSearch =
-            article.title.toLowerCase().includes(searchTerm.toLowerCase()) || article?.author.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = filterCategory === 'all' || article?.category.name.toLowerCase() === filterCategory.toLowerCase();
+            article.title.toLowerCase().includes(searchTerm.toLowerCase()) || article.author.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesCategory = filterCategory === 'all' || article.category.toLowerCase() === filterCategory.toLowerCase();
+
         return matchesSearch && matchesCategory;
     });
 
     const handleDelete = (id: number) => {
-        const article = articles.data.find((a) => a.id === id);
-        setArticles(articles.data.filter((article) => article.id !== id));
+        const article = articles.find((a) => a.id === id);
+        setArticles(articles.filter((a) => a.id !== id));
 
         toast({
             title: 'Article Deleted',
             description: `Article "${article?.title}" has been deleted successfully.`,
-        });
-    };
-
-    const toggleFeatured = (id: number) => {
-        const updatedArticles = articles.data.map((article) => (article.id === id ? { ...article, featured: !article.featured } : article));
-        setArticles(updatedArticles);
-
-        const article = updatedArticles.find((a) => a.id === id);
-        toast({
-            title: article?.featured ? 'Article Featured' : 'Article Unfeatured',
-            description: `Article "${article?.title}" has been ${article?.featured ? 'marked as featured' : 'removed from featured'}.`,
         });
     };
 
@@ -97,7 +89,7 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                     <div className="relative">
                         <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                         <Input
-                            placeholder="Search articles.data..."
+                            placeholder="Search articles..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10"
@@ -126,7 +118,8 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">Articles ({filteredArticles.length})</CardTitle>
-                        <BlogPostModal />
+                        <Button onClick={handleCreateArticle}>New Article</Button>
+                        <BlogPostModal open={isModalOpen} onOpenChange={setIsModalOpen} post={editingArticle} />
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -143,7 +136,7 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredArticles.map((article: any) => (
+                                {filteredArticles.map((article) => (
                                     <tr key={article.id} className="border-b hover:bg-gray-50">
                                         <td className="px-2 py-3">
                                             <div className="flex items-start space-x-3">
@@ -153,11 +146,11 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                                         <td className="px-2 py-3">
                                             <div className="flex items-center space-x-2">
                                                 <User className="h-4 w-4 text-gray-400" />
-                                                <span className="text-sm text-gray-600">{article?.author.name}</span>
+                                                <span className="text-sm text-gray-600">{article?.author?.name}</span>
                                             </div>
                                         </td>
                                         <td className="px-2 py-3">
-                                            <Badge className="bg-blue-100 text-blue-800">{article?.category.name}</Badge>
+                                            <Badge className="bg-blue-100 text-blue-800">{article?.category?.name}</Badge>
                                         </td>
 
                                         <td className="px-2 py-3 text-nowrap">
@@ -181,18 +174,22 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        View
+                                                    <DropdownMenuItem asChild>
+                                                        <a
+                                                            href={route('show', article.slug)}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center"
+                                                        >
+                                                            <Eye className="mr-2 h-4 w-4" />
+                                                            View
+                                                        </a>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <BlogPostModal post={article} />
+
+                                                    <DropdownMenuItem onClick={() => handleEditArticle(article)}>
                                                         <Edit className="mr-2 h-4 w-4" />
                                                         Edit
                                                     </DropdownMenuItem>
-                                                    {/* <DropdownMenuItem onClick={() => toggleFeatured(article.id)}>
-                                                        {article.featured ? 'Remove from Featured' : 'Mark as Featured'}
-                                                    </DropdownMenuItem> */}
                                                     <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(article.id)}>
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Delete

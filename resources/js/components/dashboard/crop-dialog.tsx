@@ -55,9 +55,7 @@ export function CropDialog({
                 </DialogHeader>
 
                 <div className="rounded-lg border bg-gray-50 p-4">
-                    <p className="mb-4 text-sm text-gray-500">
-                        Tentukan posisi terbaik untuk foto — sesuaikan area potong agar hasil terlihat optimal.
-                    </p>
+                    <p className="mb-4 text-sm text-gray-500">Sesuaikan area potong agar hasil terlihat optimal.</p>
                     <div className="relative mx-auto">
                         <ReactCrop
                             crop={crop}

@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 
 import { CropDialog } from '@/components/dashboard/crop-dialog';
@@ -16,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { router, usePage } from '@inertiajs/react';
-import { CropIcon, Loader2, PlusCircle, Upload, X } from 'lucide-react';
+import { CropIcon, Loader2, Upload, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 
@@ -40,38 +38,39 @@ type ValidationErrors = {
 };
 
 type BlogPostModalProps = {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     post?: {
         id: number;
         title: string;
-        description: string;
+        excerpt: string;
         body1: string;
         body2?: string;
-        category: string | number;
+        category: {
+            id: number;
+        };
         tags: string[];
-        mainImage?: string;
-        subImage1?: string;
+        picture1?: string;
+        picture2?: string;
     };
 };
 
-export default function BlogPostModal({ post }: BlogPostModalProps) {
+export default function BlogPostModal({ open, onOpenChange, post }: BlogPostModalProps) {
     const { auth, categories } = usePage().props;
 
-    const [open, setOpen] = useState(false);
+    const getStoragePath = (path?: string) => (path ? `/storage/${path}` : '');
+
     const [title, setTitle] = useState(post?.title ?? '');
-    const [description, setDescription] = useState(post?.description ?? '');
+    const [description, setDescription] = useState(post?.excerpt ?? '');
     const [body1, setBody1] = useState(post?.body1 ?? '');
     const [body2, setBody2] = useState(post?.body2 ?? '');
-    const [category, setCategory] = useState(post?.category?.toString() ?? '');
-
+    const [category, setCategory] = useState(post?.category?.id ?? '');
     const [imageType, setImageType] = useState<'main' | 'sub1' | null>(null);
-
-    const [mainImage, setMainImage] = useState(post?.mainImage ?? '');
-    const [subImage1, setSubImage1] = useState(post?.subImage1 ?? '');
-
+    const [mainImage, setMainImage] = useState(getStoragePath(post?.picture1));
+    const [subImage1, setSubImage1] = useState(getStoragePath(post?.picture2));
     const [tagInput, setTagInput] = useState('');
     const [tags, setTags] = useState<string[]>(post?.tags ?? []);
     const [activeTab, setActiveTab] = useState('media');
-
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [pulse, setPulse] = useState(false);
@@ -121,7 +120,7 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
 
         if (imageType === 'main') setMainImage(base64);
         else if (imageType === 'sub1') setSubImage1(base64);
-    }, [completedCrop]);
+    }, [completedCrop, imageType]);
 
     const [crop, setCrop] = useState({
         unit: '%',
@@ -167,6 +166,23 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
             return () => clearTimeout(timer);
         }
     }, [pulse]);
+
+    useEffect(() => {
+        if (post) {
+            setTitle(post.title ?? '');
+            setDescription(post.excerpt ?? '');
+            setBody1(post.body1 ?? '');
+            setBody2(post.body2 ?? '');
+            setCategory(post.category?.id ?? '');
+            setMainImage(getStoragePath(post?.picture1));
+            setSubImage1(getStoragePath(post?.picture2));
+            setTags(post.tags ?? []);
+        } else {
+            resetForm(); // kalau bikin baru
+        }
+    }, [post, open]);
+
+    console.log(post);
 
     const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === ';' && tagInput.trim() !== '') {
@@ -247,7 +263,7 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
                 },
                 onSuccess: () => {
                     toast({ title: 'Berhasil!', description: 'Blog berhasil diperbarui' });
-                    setOpen(false);
+                    onOpenChange(false);
                     setIsSubmitting(false);
                 },
             });
@@ -260,7 +276,7 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
                 onSuccess: () => {
                     toast({ title: 'Berhasil!', description: 'Blog berhasil dipublis' });
                     resetForm();
-                    setOpen(false);
+                    onOpenChange(false);
                     setIsSubmitting(false);
                 },
             });
@@ -281,24 +297,9 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
         setErrors({});
     };
 
-    const handleOpenChange = (newOpen: boolean) => {
-        if (open && !newOpen) {
-            setPulse(true);
-            return;
-        }
-        setOpen(newOpen);
-    };
-
     return (
         <>
-            {!post && (
-                <Button className="gap-2 bg-blue-600 hover:bg-blue-700" onClick={() => setOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    New Article
-                </Button>
-            )}
-
-            <Dialog open={open} onOpenChange={handleOpenChange} modal={false}>
+            <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
                 <DialogContent
                     className={'overflow-hidden p-0 transition-all duration-300 sm:max-w-[1000px]'}
                     ref={dialogRef}
@@ -317,7 +318,7 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
                             {post ? 'Perbarui detail artikel Anda.' : 'Isi detail di bawah ini untuk membuat postingan artikel baru.'}
                         </DialogDescription>
 
-                        <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={() => setOpen(false)}>
+                        <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={() => onOpenChange(false)}>
                             <X className="h-3" />
                         </Button>
                     </DialogHeader>
@@ -542,7 +543,6 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
                                             </div>
                                         </div>
                                     </TabsContent>
-
                                     <TabsContent value="content" className="mt-0 space-y-6">
                                         <div className="grid grid-cols-12 gap-6">
                                             {/* Left sidebar - Tags */}
@@ -664,7 +664,6 @@ export default function BlogPostModal({ post }: BlogPostModalProps) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
             <CropDialog
                 open={cropDialogOpen}
                 onClose={() => setCropDialogOpen(false)}
