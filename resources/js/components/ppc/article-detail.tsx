@@ -127,7 +127,7 @@ function TagsAndShare({ article }: { article: Article }) {
                         <span className="mr-2 text-sm font-medium text-gray-600">Tags:</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        {article.tags?.map((tag: string, index: number) => (
+                        {article?.tags?.map((tag: string, index: number) => (
                             <span
                                 key={index}
                                 className="cursor-pointer rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200"

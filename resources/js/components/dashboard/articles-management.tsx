@@ -1,6 +1,5 @@
 'use client';
 
-import BlogPostModal from '@/components/dashboard/blog-post-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Edit, Eye, Filter, MoreHorizontal, Search, Trash2, User } from 'lucide-react';
 import { useState } from 'react';
+import BlogPostModal from './blog_post_modal_edit';
 
 interface Article {
     id: number;
@@ -61,11 +61,11 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
         });
     };
 
-    // const handleCreateArticle = () => {
-    //     setModalMode('create');
-    //     setEditingArticle(undefined);
-    //     setIsModalOpen(true);
-    // };
+    const handleCreateArticle = () => {
+        setModalMode('create');
+        setEditingArticle(undefined);
+        setIsModalOpen(true);
+    };
 
     const handleEditArticle = (article: Article) => {
         setModalMode('edit');
@@ -185,7 +185,8 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         View
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleEditArticle(article)}>
+                                                    <DropdownMenuItem>
+                                                        <BlogPostModal post={article} />
                                                         <Edit className="mr-2 h-4 w-4" />
                                                         Edit
                                                     </DropdownMenuItem>

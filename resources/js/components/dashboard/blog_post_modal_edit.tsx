@@ -1,0 +1,686 @@
+'use client';
+
+import type React from 'react';
+
+import { CropDialog } from '@/components/dashboard/crop-dialog';
+import RichTextEditor from '@/components/dashboard/rich-text-editor';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { router, usePage } from '@inertiajs/react';
+import { CropIcon, Loader2, PlusCircle, Upload, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { z } from 'zod';
+
+// Skema validasi
+const blogPostSchema = z.object({
+    title: z.string().min(5, 'Judul minimal 5 karakter').max(250, 'Judul maksimal 250 karakter'),
+    description: z.string().min(10, 'Deskripsi minimal 10 karakter').max(255, 'Deskripsi maksimal 255 karakter'),
+    body1: z.string().min(20, 'Konten utama minimal 20 karakter'),
+    body2: z.string().optional(),
+    category: z.union([z.string(), z.number()], {
+        required_error: 'Kategori wajib dipilih',
+        invalid_type_error: 'Kategori harus berupa angka atau string',
+    }),
+    tags: z.array(z.string()).min(1, 'Minimal 1 tag harus dipilih').max(5, 'Maksimal 5 tag'),
+    mainImage: z.any().optional(),
+    subImage1: z.any().optional(),
+});
+
+type ValidationErrors = {
+    [key: string]: string | undefined;
+};
+
+type BlogPostModalProps = {
+    post?: {
+        id: number;
+        title: string;
+        description: string;
+        body1: string;
+        body2?: string;
+        category: string | number;
+        tags: string[];
+        mainImage?: string;
+        subImage1?: string;
+    };
+};
+
+export default function BlogPostModal({ post }: BlogPostModalProps) {
+    const { auth, categories } = usePage().props;
+
+    const [open, setOpen] = useState(false);
+    const [title, setTitle] = useState(post?.title ?? '');
+    const [description, setDescription] = useState(post?.description ?? '');
+    const [body1, setBody1] = useState(post?.body1 ?? '');
+    const [body2, setBody2] = useState(post?.body2 ?? '');
+    const [category, setCategory] = useState(post?.category?.toString() ?? '');
+
+    const [imageType, setImageType] = useState<'main' | 'sub1' | null>(null);
+
+    const [mainImage, setMainImage] = useState(post?.mainImage ?? '');
+    const [subImage1, setSubImage1] = useState(post?.subImage1 ?? '');
+
+    const [tagInput, setTagInput] = useState('');
+    const [tags, setTags] = useState<string[]>(post?.tags ?? []);
+    const [activeTab, setActiveTab] = useState('media');
+
+    const [errors, setErrors] = useState<ValidationErrors>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [pulse, setPulse] = useState(false);
+    const dialogRef = useRef<HTMLDivElement>(null);
+
+    const [errorsServer, setErrorsServer] = useState('');
+
+    // Crop state
+    const [src, setSrc] = useState<string | null>(null);
+    const [cropDialogOpen, setCropDialogOpen] = useState(false);
+    const [completedCrop, setCompletedCrop] = useState<any>(null);
+    const imgRef = useRef<HTMLImageElement | null>(null);
+    const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
+    const aspectRatio = 4 / 3;
+
+    const onImageLoad = useCallback((img: HTMLImageElement) => {
+        imgRef.current = img;
+        const width = img.width * 0.75;
+        const height = width * (3 / 4);
+        setCrop({
+            unit: 'px',
+            width,
+            height,
+            x: (img.width - width) / 2,
+            y: (img.height - height) / 2,
+            aspect: aspectRatio,
+        });
+        return false;
+    }, []);
+
+    const generateCrop = useCallback(() => {
+        if (!completedCrop || !imgRef.current || !previewCanvasRef.current) return;
+        const image = imgRef.current;
+        const canvas = previewCanvasRef.current;
+        const { width, height, x, y } = completedCrop;
+        const scaleX = image.naturalWidth / image.width;
+        const scaleY = image.naturalHeight / image.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        canvas.width = width * scaleX;
+        canvas.height = height * scaleY;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(image, x * scaleX, y * scaleY, width * scaleX, height * scaleY, 0, 0, width * scaleX, height * scaleY);
+        let base64 = canvas.toDataURL('image/jpeg', 1.0);
+        if (base64.length > 700000) base64 = canvas.toDataURL('image/jpeg', 0.8);
+
+        if (imageType === 'main') setMainImage(base64);
+        else if (imageType === 'sub1') setSubImage1(base64);
+    }, [completedCrop]);
+
+    const [crop, setCrop] = useState({
+        unit: '%',
+        width: 75,
+        height: 100,
+        x: 12.5,
+        y: 0,
+        aspect: aspectRatio,
+    });
+
+    const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>, type: 'main' | 'sub1') => {
+        if (!e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        if (file.size > 510 * 1024) {
+            toast({ title: `Gagal Upload Foto`, description: `Ukuran foto tidak boleh melebihi 510 KB` });
+            e.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setSrc(reader.result as string);
+            setImageType(type);
+        };
+        reader.readAsDataURL(file);
+        setCropDialogOpen(true);
+    };
+
+    // Reset error ketika input berubah
+    useEffect(() => {
+        if (errors.title && title.length >= 5) setErrors((p) => ({ ...p, title: undefined }));
+        if (errors.description && description.length >= 10) setErrors((p) => ({ ...p, description: undefined }));
+        if (errors.body1 && body1.length >= 20) setErrors((p) => ({ ...p, body1: undefined }));
+        if (errors.mainImage && mainImage) setErrors((p) => ({ ...p, mainImage: undefined }));
+        if (errors.tags && tags.length >= 1) setErrors((p) => ({ ...p, tags: undefined }));
+        if (errors.category && category.length >= 1) setErrors((p) => ({ ...p, category: undefined }));
+    }, [title, description, body1, mainImage, tags, category, errors]);
+
+    useEffect(() => {
+        if (pulse) {
+            const timer = setTimeout(() => setPulse(false), 300);
+            return () => clearTimeout(timer);
+        }
+    }, [pulse]);
+
+    const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === ';' && tagInput.trim() !== '') {
+            e.preventDefault();
+            const newTag = tagInput.trim().replace(';', '');
+            if (newTag && !tags.includes(newTag)) {
+                if (tags.length >= 5) {
+                    setErrors((p) => ({ ...p, tags: 'Maximum 5 tags allowed' }));
+                    return;
+                }
+                setTags([...tags, newTag]);
+                if (errors.tags) setErrors((p) => ({ ...p, tags: undefined }));
+            }
+            setTagInput('');
+        }
+    };
+
+    const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setTagInput(value);
+        if (value.endsWith(';')) {
+            const newTag = value.slice(0, -1).trim();
+            if (newTag && !tags.includes(newTag)) {
+                if (tags.length >= 5) {
+                    setErrors((p) => ({ ...p, tags: 'Maximum 5 tags allowed' }));
+                    return;
+                }
+                setTags([...tags, newTag]);
+                if (errors.tags) setErrors((p) => ({ ...p, tags: undefined }));
+            }
+            setTagInput('');
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setTags(tags.filter((t) => t !== tagToRemove));
+        if (tags.length <= 1) setErrors((p) => ({ ...p, tags: 'At least one tag is required' }));
+    };
+
+    const validateForm = () => {
+        try {
+            blogPostSchema.parse({ title, description, body1, body2, category, tags, mainImage, subImage1 });
+            return true;
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const newErrors: ValidationErrors = {};
+                error.errors.forEach((err) => {
+                    const path = err.path[0] as string;
+                    newErrors[path] = err.message;
+                });
+                setErrors(newErrors);
+                const firstError = error.errors[0];
+                if (firstError) toast({ title: 'Validation Error', description: firstError.message, variant: 'destructive' });
+            } else {
+                toast({ title: 'Error', description: 'Unexpected error occurred.', variant: 'destructive' });
+            }
+            return false;
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        const isValid = validateForm();
+        if (!isValid) {
+            setIsSubmitting(false);
+            return;
+        }
+
+        const payload = { title, description, body1, body2, mainImage, subImage1, tags, category };
+
+        if (post) {
+            router.put(route('blog.update', post.id), payload, {
+                onError: (e) => {
+                    setErrorsServer(e);
+                    setIsSubmitting(false);
+                },
+                onSuccess: () => {
+                    toast({ title: 'Berhasil!', description: 'Blog berhasil diperbarui' });
+                    setOpen(false);
+                    setIsSubmitting(false);
+                },
+            });
+        } else {
+            router.post(route('blog.store'), payload, {
+                onError: (e) => {
+                    setErrorsServer(e);
+                    setIsSubmitting(false);
+                },
+                onSuccess: () => {
+                    toast({ title: 'Berhasil!', description: 'Blog berhasil dipublis' });
+                    resetForm();
+                    setOpen(false);
+                    setIsSubmitting(false);
+                },
+            });
+        }
+    };
+
+    const resetForm = () => {
+        setTitle('');
+        setDescription('');
+        setBody1('');
+        setBody2('');
+        setCategory('');
+        setMainImage('');
+        setSubImage1('');
+        setTagInput('');
+        setTags([]);
+        setActiveTab('media');
+        setErrors({});
+    };
+
+    const handleOpenChange = (newOpen: boolean) => {
+        if (open && !newOpen) {
+            setPulse(true);
+            return;
+        }
+        setOpen(newOpen);
+    };
+
+    return (
+        <>
+            {!post && (
+                <Button className="gap-2 bg-blue-600 hover:bg-blue-700" onClick={() => setOpen(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    New Article
+                </Button>
+            )}
+
+            <Dialog open={open} onOpenChange={handleOpenChange} modal={false}>
+                <DialogContent
+                    className={'overflow-hidden p-0 transition-all duration-300 sm:max-w-[1000px]'}
+                    ref={dialogRef}
+                    onInteractOutside={(e) => {
+                        e.preventDefault();
+                        setPulse(true);
+                    }}
+                    onEscapeKeyDown={(e) => {
+                        e.preventDefault();
+                        setPulse(true);
+                    }}
+                >
+                    <DialogHeader className="relative p-6 pb-2">
+                        <DialogTitle>{post ? 'Edit Artikel' : 'Buat Postingan Artikel Baru'}</DialogTitle>
+                        <DialogDescription>
+                            {post ? 'Perbarui detail artikel Anda.' : 'Isi detail di bawah ini untuk membuat postingan artikel baru.'}
+                        </DialogDescription>
+
+                        <Button variant="ghost" size="icon" className="absolute top-4 right-4" onClick={() => setOpen(false)}>
+                            <X className="h-3" />
+                        </Button>
+                    </DialogHeader>
+
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        {/* Menampilkan list error */}
+                        {Object.keys(errorsServer).length > 0 && (
+                            <div className="mb-4 rounded bg-red-100 p-4 text-red-700">
+                                <ul className="list-inside list-disc">
+                                    {Object.values(errorsServer).map((error, index) => (
+                                        <li key={index}>{error}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        <div className="px-6">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="media">Step 1</TabsTrigger>
+                                <TabsTrigger value="content">Step 2</TabsTrigger>
+                            </TabsList>
+                        </div>
+
+                        <div className="h-[calc(90vh-180px)] overflow-hidden">
+                            <ScrollArea className="h-full w-full">
+                                <div className="p-6">
+                                    <TabsContent value="media" className="mt-0">
+                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                            {/* Left column - Title and Description */}
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="title" className={cn('text-sm font-medium', errors.title && 'text-destructive')}>
+                                                        Judul <span className="text-red-500">*</span>
+                                                    </Label>
+                                                    <Input
+                                                        id="title"
+                                                        value={title}
+                                                        onChange={(e) => setTitle(e.target.value)}
+                                                        placeholder="Enter blog post title"
+                                                        required
+                                                        autoFocus
+                                                        className={errors.title ? 'border-destructive' : ''}
+                                                    />
+                                                    {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label
+                                                        htmlFor="description"
+                                                        className={cn('text-sm font-medium', errors.description && 'text-destructive')}
+                                                    >
+                                                        Deskripsi <span className="text-red-500">*</span>
+                                                    </Label>
+                                                    <Textarea
+                                                        id="description"
+                                                        value={description}
+                                                        onChange={(e) => setDescription(e.target.value)}
+                                                        placeholder="Enter a short description"
+                                                        required
+                                                        className={cn('min-h-[150px]', errors.description && 'border-destructive')}
+                                                    />
+                                                    {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="author" className="text-sm font-medium">
+                                                        Penulis
+                                                    </Label>
+                                                    <Input id="author" value={auth?.user.name} disabled className="bg-gray-300" />
+                                                </div>
+                                            </div>
+
+                                            {/* Right column - Images */}
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <Label className="text-sm font-medium">Images</Label>
+                                                    <div className="grid grid-cols-1 gap-4">
+                                                        {/* Main Image */}
+                                                        <div className="space-y-2">
+                                                            <Label
+                                                                htmlFor="mainImage"
+                                                                className={cn('text-xs text-gray-500', errors.mainImage && 'text-destructive')}
+                                                            >
+                                                                Main Image <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <div className="flex flex-col items-center">
+                                                                <div
+                                                                    className={cn(
+                                                                        'flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 transition-colors hover:border-primary/50',
+                                                                        mainImage ? 'border-primary' : 'border-gray-300',
+                                                                        errors.mainImage && !mainImage && 'border-destructive',
+                                                                    )}
+                                                                    onClick={() => document.getElementById('mainImage')?.click()}
+                                                                >
+                                                                    {mainImage ? (
+                                                                        <div className="relative h-full w-full">
+                                                                            <img
+                                                                                src={mainImage || '/placeholder.svg'}
+                                                                                alt="Main preview"
+                                                                                className="h-full w-full rounded-md object-cover"
+                                                                                style={{ aspectRatio: `${aspectRatio}`, objectFit: 'cover' }}
+                                                                            />
+                                                                            <div className="absolute top-1 right-1 flex gap-1">
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="secondary"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6 bg-white"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setSrc(mainImage);
+                                                                                        setImageType('main');
+                                                                                        setCropDialogOpen(true);
+                                                                                    }}
+                                                                                >
+                                                                                    <CropIcon className="h-3 w-3" />
+                                                                                </Button>
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="destructive"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setMainImage('');
+                                                                                    }}
+                                                                                >
+                                                                                    <X className="h-3 w-3" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                                                                            <p className="text-xs text-gray-500">Upload main image (required)</p>
+                                                                            <p className="text-[10px] text-gray-400">
+                                                                                Max size: 510 KB • Allowed types: JPG, PNG • Ratio 4:3 (landscape)
+                                                                            </p>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <Input
+                                                                    id="mainImage"
+                                                                    type="file"
+                                                                    accept="image/png,image/jpeg,image/webp"
+                                                                    onChange={(e) => onSelectFile(e, 'main')}
+                                                                    required
+                                                                    className="hidden"
+                                                                />
+
+                                                                {errors.mainImage && !mainImage && (
+                                                                    <p className="mt-1 text-xs text-destructive">{errors.mainImage}</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Sub Image */}
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="subImage1" className="text-xs text-gray-500">
+                                                                Sub Image <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <div className="flex flex-col items-center">
+                                                                <div
+                                                                    className={cn(
+                                                                        'flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-2 transition-colors hover:border-primary/50',
+                                                                        subImage1 ? 'border-primary' : 'border-gray-300',
+                                                                    )}
+                                                                    onClick={() => document.getElementById('subImage1')?.click()}
+                                                                >
+                                                                    {subImage1 ? (
+                                                                        <div className="relative h-full w-full">
+                                                                            <img
+                                                                                src={subImage1 || '/placeholder.svg'}
+                                                                                alt="Sub image 1 preview"
+                                                                                className="h-full w-full rounded-md object-cover"
+                                                                                style={{ aspectRatio: `${aspectRatio}`, objectFit: 'cover' }}
+                                                                            />
+                                                                            <div className="absolute top-1 right-1 flex gap-1">
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="secondary"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6 bg-white"
+                                                                                >
+                                                                                    <CropIcon className="h-3 w-3" />
+                                                                                </Button>
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="destructive"
+                                                                                    size="icon"
+                                                                                    className="h-6 w-6"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setSubImage1('');
+                                                                                    }}
+                                                                                >
+                                                                                    <X className="h-3 w-3" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Upload className="mb-1 h-6 w-6 text-gray-400" />
+                                                                            <p className="text-xs text-gray-500">Upload sub image 1</p>
+                                                                            <p className="text-[10px] text-gray-400">
+                                                                                Max size: 510 KB • Allowed types: JPG, PNG • Ratio 4:3 (landscape)
+                                                                            </p>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <Input
+                                                                    id="subImage1"
+                                                                    type="file"
+                                                                    accept="image/png,image/jpeg,image/webp"
+                                                                    onChange={(e) => onSelectFile(e, 'sub1')}
+                                                                    className="hidden"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="content" className="mt-0 space-y-6">
+                                        <div className="grid grid-cols-12 gap-6">
+                                            {/* Left sidebar - Tags */}
+                                            <div className="col-span-12 space-y-6 md:col-span-3">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="category7" className="text-sm font-medium">
+                                                        Kategori Artikel <span className="text-red-500">*</span>
+                                                    </Label>
+                                                    <Select value={category} onValueChange={setCategory}>
+                                                        <SelectTrigger id="category7" className={cn(errors.category && 'border-destructive')}>
+                                                            <SelectValue placeholder="Pilih kategori" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {categories.map((cat: any) => (
+                                                                <SelectItem key={cat?.name} value={cat?.id}>
+                                                                    {cat?.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {errors.category && <p className="text-xs text-destructive">{errors.category}</p>}
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="tags" className={cn('text-sm font-medium', errors.tags && 'text-destructive')}>
+                                                        Tags <span className="text-red-500">*</span> (Maksimal 5, ketik lalu tekan ; untuk
+                                                        menambahkan)
+                                                    </Label>
+                                                    <div className="flex flex-col space-y-2">
+                                                        <Input
+                                                            id="tags"
+                                                            value={tagInput}
+                                                            onChange={handleTagInputChange}
+                                                            onKeyDown={handleTagKeyDown}
+                                                            placeholder="Type a tag and press ; (semicolon)"
+                                                            className={errors.tags ? 'border-destructive' : ''}
+                                                            disabled={tags.length >= 5}
+                                                        />
+                                                        {errors.tags && <p className="text-xs text-destructive">{errors.tags}</p>}
+                                                        <div
+                                                            className={cn(
+                                                                'min-h-[200px] overflow-auto rounded-md border p-3',
+                                                                errors.tags && tags.length === 0 && 'border-destructive',
+                                                            )}
+                                                        >
+                                                            {tags.length > 0 ? (
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {tags.map((tag) => (
+                                                                        <Badge key={tag} variant="secondary" className="px-2 py-1 text-xs">
+                                                                            {tag}
+                                                                            <span
+                                                                                onClick={() => removeTag(tag)}
+                                                                                className="ml-1 inline-flex h-3 w-3 cursor-pointer"
+                                                                            >
+                                                                                <X className="h-full w-full" />
+                                                                            </span>
+                                                                        </Badge>
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-sm text-gray-400">No tags added yet</p>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {tags.length}/5 tags used {tags.length === 0 && '(at least one tag required)'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Right content area - Rich Text Editors */}
+                                            <div className="col-span-12 space-y-6 md:col-span-9">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="body1" className={cn('text-sm font-medium', errors.body1 && 'text-destructive')}>
+                                                        Body 1 <span className="text-red-500">*</span>
+                                                    </Label>
+                                                    <div className={cn('min-h-[300px] rounded-md border', errors.body1 && 'border-destructive')}>
+                                                        <RichTextEditor value={body1} onChange={setBody1} placeholder="Enter the main content" />
+                                                    </div>
+                                                    {errors.body1 && <p className="text-xs text-destructive">{errors.body1}</p>}
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="body2" className="text-sm font-medium">
+                                                        Body 2
+                                                    </Label>
+                                                    <div className="min-h-[300px] rounded-md border">
+                                                        <RichTextEditor
+                                                            value={body2}
+                                                            onChange={setBody2}
+                                                            placeholder="Enter additional content (optional)"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    </Tabs>
+
+                    <DialogFooter className="flex space-x-2 p-6 pt-2">
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    {post ? 'Updating...' : 'Saving...'}
+                                </>
+                            ) : post ? (
+                                'Update Post'
+                            ) : (
+                                'Save Post'
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <CropDialog
+                open={cropDialogOpen}
+                onClose={() => setCropDialogOpen(false)}
+                onCropDone={(base64) => {
+                    if (imageType === 'main') setMainImage(base64);
+                    else if (imageType === 'sub1') setSubImage1(base64);
+                }}
+                src={src!}
+                crop={crop}
+                setCrop={setCrop}
+                setCompletedCrop={setCompletedCrop}
+                onImageLoad={onImageLoad}
+                generateCrop={generateCrop}
+                previewCanvasRef={previewCanvasRef}
+                aspectRatio={aspectRatio}
+            />
+        </>
+    );
+}
