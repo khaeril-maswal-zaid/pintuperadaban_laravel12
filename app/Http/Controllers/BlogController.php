@@ -50,24 +50,20 @@ class BlogController extends Controller
         [$type, $data] = explode(';', $base64Image);
         [, $extension] = explode('/', $type); // jpeg, png
         [, $base64Data] = explode(',', $data);
-
         $filename = uniqid() . '-' . Str::slug($request->title) . '.' . $extension;
-
         Storage::disk('public')->put("image/blog/{$filename}", base64_decode($base64Data));
-
         $mainPath = "image/blog/{$filename}";
 
-        $base64Image1 = $request->subImage1;
-
-        [$type1, $data1] = explode(';', $base64Image1);
-        [, $extension1] = explode('/', $type1); // jpeg, png
-        [, $base64Data1] = explode(',', $data1);
-
-        $filename1 = uniqid() . '-' . Str::slug($request->title) . '-sub.' . $extension1;
-
-        Storage::disk('public')->put("image/blog/{$filename1}", base64_decode($base64Data1));
-
-        $mainPath1 = "image/blog/{$filename1}";
+        $mainPath1 = null;
+        if ($request->filled('subImage1') && str_starts_with($request->subImage1, 'data:image')) {
+            $base64Image1 = $request->subImage1;
+            [$type1, $data1] = explode(';', $base64Image1);
+            [, $extension1] = explode('/', $type1); // jpeg, png
+            [, $base64Data1] = explode(',', $data1);
+            $filename1 = uniqid() . '-' . Str::slug($request->title) . '-sub.' . $extension1;
+            Storage::disk('public')->put("image/blog/{$filename1}", base64_decode($base64Data1));
+            $mainPath1 = "image/blog/{$filename1}";
+        }
 
         $body1 = str_replace('<p>', '<p class="mb-2">', $request->body1);
         $body2 = str_replace('<p>', '<p class="mb-2">', $request->body2);
@@ -156,8 +152,64 @@ class BlogController extends Controller
      */
     public function update(UpdateBlogRequest $request, Blog $blog)
     {
-        //
+        $mainPath = $blog->picture1; // default pakai path lama
+        $mainPath1 = $blog->picture2;
+
+        // ==== MAIN IMAGE ====
+        if ($request->filled('mainImage') && str_starts_with($request->mainImage, 'data:image')) {
+            // Hapus file lama kalau ada
+            if ($blog->picture1 && Storage::disk('public')->exists($blog->picture1)) {
+                Storage::disk('public')->delete($blog->picture1);
+            }
+
+            $base64Image = $request->mainImage;
+            [$type, $data] = explode(';', $base64Image);
+            [, $extension] = explode('/', $type); // jpeg, png
+            [, $base64Data] = explode(',', $data);
+
+            $filename = uniqid() . '-' . Str::slug($request->title) . '.' . $extension;
+            Storage::disk('public')->put("image/blog/{$filename}", base64_decode($base64Data));
+
+            $mainPath = "image/blog/{$filename}";
+        }
+
+        // ==== SUB IMAGE ====
+        if ($request->filled('subImage1') && str_starts_with($request->subImage1, 'data:image')) {
+            // Hapus file lama kalau ada
+            if ($blog->picture2 && Storage::disk('public')->exists($blog->picture2)) {
+                Storage::disk('public')->delete($blog->picture2);
+            }
+
+            $base64Image1 = $request->subImage1;
+            [$type1, $data1] = explode(';', $base64Image1);
+            [, $extension1] = explode('/', $type1); // jpeg, png
+            [, $base64Data1] = explode(',', $data1);
+
+            $filename1 = uniqid() . '-' . Str::slug($request->title) . '-sub.' . $extension1;
+            Storage::disk('public')->put("image/blog/{$filename1}", base64_decode($base64Data1));
+
+            $mainPath1 = "image/blog/{$filename1}";
+        }
+
+        // ==== BODY ====
+        $body1 = str_replace('<p>', '<p class="mb-2">', $request->body1);
+        $body2 = str_replace('<p>', '<p class="mb-2">', $request->body2);
+
+        // ==== UPDATE ====
+        $blog->update([
+            'user_id' => Auth::id(),
+            'slug' => Str::slug($request->title, '-'),
+            'title' => $request->title,
+            'excerpt' => $request->description,
+            'body1' => $body1,
+            'body2' => $body2,
+            'picture1' => $mainPath,
+            'picture2' => $mainPath1,
+            'tags' => $request->tags,
+            'category_articles_id' => $request->category,
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.

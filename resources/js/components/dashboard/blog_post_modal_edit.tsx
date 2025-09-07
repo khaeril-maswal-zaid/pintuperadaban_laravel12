@@ -21,10 +21,10 @@ import { z } from 'zod';
 // Skema validasi
 const blogPostSchema = z.object({
     title: z.string().min(5, 'Judul minimal 5 karakter').max(250, 'Judul maksimal 250 karakter'),
-    description: z.string().min(10, 'Deskripsi minimal 10 karakter').max(255, 'Deskripsi maksimal 255 karakter'),
+    description: z.string().min(10, 'Deskripsi minimal 10 karakter').max(300, 'Deskripsi maksimal 300 karakter'),
     body1: z.string().min(20, 'Konten utama minimal 20 karakter'),
     body2: z.string().optional(),
-    category: z.union([z.string(), z.number()], {
+    category: z.number({
         required_error: 'Kategori wajib dipilih',
         invalid_type_error: 'Kategori harus berupa angka atau string',
     }),
@@ -42,6 +42,7 @@ type BlogPostModalProps = {
     onOpenChange: (open: boolean) => void;
     post?: {
         id: number;
+        slug: string;
         title: string;
         excerpt: string;
         body1: string;
@@ -64,7 +65,7 @@ export default function BlogPostModal({ open, onOpenChange, post }: BlogPostModa
     const [description, setDescription] = useState(post?.excerpt ?? '');
     const [body1, setBody1] = useState(post?.body1 ?? '');
     const [body2, setBody2] = useState(post?.body2 ?? '');
-    const [category, setCategory] = useState(post?.category?.id ?? '');
+    const [category, setCategory] = useState(post?.category?.id ?? 0);
     const [imageType, setImageType] = useState<'main' | 'sub1' | null>(null);
     const [mainImage, setMainImage] = useState(getStoragePath(post?.picture1));
     const [subImage1, setSubImage1] = useState(getStoragePath(post?.picture2));
@@ -153,11 +154,11 @@ export default function BlogPostModal({ open, onOpenChange, post }: BlogPostModa
     // Reset error ketika input berubah
     useEffect(() => {
         if (errors.title && title.length >= 5) setErrors((p) => ({ ...p, title: undefined }));
-        if (errors.description && description.length >= 10) setErrors((p) => ({ ...p, description: undefined }));
+        if (errors.description && description.length >= 10 && description.length <= 300) setErrors((p) => ({ ...p, description: undefined }));
         if (errors.body1 && body1.length >= 20) setErrors((p) => ({ ...p, body1: undefined }));
         if (errors.mainImage && mainImage) setErrors((p) => ({ ...p, mainImage: undefined }));
         if (errors.tags && tags.length >= 1) setErrors((p) => ({ ...p, tags: undefined }));
-        if (errors.category && category.length >= 1) setErrors((p) => ({ ...p, category: undefined }));
+        if (errors.category && category >= 1) setErrors((p) => ({ ...p, category: undefined }));
     }, [title, description, body1, mainImage, tags, category, errors]);
 
     useEffect(() => {
@@ -181,8 +182,6 @@ export default function BlogPostModal({ open, onOpenChange, post }: BlogPostModa
             resetForm(); // kalau bikin baru
         }
     }, [post, open]);
-
-    console.log(post);
 
     const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === ';' && tagInput.trim() !== '') {
@@ -256,7 +255,7 @@ export default function BlogPostModal({ open, onOpenChange, post }: BlogPostModa
         const payload = { title, description, body1, body2, mainImage, subImage1, tags, category };
 
         if (post) {
-            router.put(route('blog.update', post.id), payload, {
+            router.put(route('blog.update', post.slug), payload, {
                 onError: (e) => {
                     setErrorsServer(e);
                     setIsSubmitting(false);
@@ -288,7 +287,7 @@ export default function BlogPostModal({ open, onOpenChange, post }: BlogPostModa
         setDescription('');
         setBody1('');
         setBody2('');
-        setCategory('');
+        setCategory(0);
         setMainImage('');
         setSubImage1('');
         setTagInput('');

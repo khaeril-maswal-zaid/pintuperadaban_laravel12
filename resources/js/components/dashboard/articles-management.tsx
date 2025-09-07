@@ -7,11 +7,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Edit, Eye, Filter, MoreHorizontal, Search, Trash2, User } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BlogPostModal from './blog_post_modal_edit';
 
 interface Article {
     id: number;
+    slug: string;
     title: string;
     author: any;
     category: any;
@@ -27,11 +28,14 @@ interface Article {
 export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] | { data: Article[] } }) {
     const [articles, setArticles] = useState<Article[]>(Array.isArray(mockArticles) ? mockArticles : (mockArticles?.data ?? []));
 
+    useEffect(() => {
+        setArticles(Array.isArray(mockArticles) ? mockArticles : (mockArticles?.data ?? []));
+    }, [mockArticles]);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingArticle, setEditingArticle] = useState<Article | undefined>();
-    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
     const { toast } = useToast();
 
     const filteredArticles = articles.filter((article) => {
@@ -54,13 +58,11 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
     };
 
     const handleCreateArticle = () => {
-        setModalMode('create');
         setEditingArticle(undefined);
         setIsModalOpen(true);
     };
 
     const handleEditArticle = (article: Article) => {
-        setModalMode('edit');
         setEditingArticle(article);
         setIsModalOpen(true);
     };

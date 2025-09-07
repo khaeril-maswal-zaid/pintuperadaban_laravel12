@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
     Route::get('dashboard/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::post('dashboard/blog/store', [BlogController::class, 'store'])->name('blog.store');
+    Route::put('dashboard/blog/update/{blog:slug}', [BlogController::class, 'update'])->name('blog.update');
 });
 
 Route::get('/{blog:slug}/{time}', [BlogController::class, 'show'])->name('show2');

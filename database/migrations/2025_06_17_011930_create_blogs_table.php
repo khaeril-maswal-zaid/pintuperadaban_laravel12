@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('excerpt');
             $table->text('body1');
-            $table->text('body2');
+            $table->text('body2')->nullable();
             $table->string('picture1')->default('default.png');
             $table->string('picture2')->nullable();
             $table->json('tags')->nullable();
