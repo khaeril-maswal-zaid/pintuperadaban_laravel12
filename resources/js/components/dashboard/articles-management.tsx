@@ -27,6 +27,7 @@ interface Article {
 
 export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] | { data: Article[] } }) {
     const [articles, setArticles] = useState<Article[]>(Array.isArray(mockArticles) ? mockArticles : (mockArticles?.data ?? []));
+    console.log(articles);
 
     useEffect(() => {
         setArticles(Array.isArray(mockArticles) ? mockArticles : (mockArticles?.data ?? []));

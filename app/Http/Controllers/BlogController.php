@@ -21,7 +21,7 @@ class BlogController extends Controller
     public function index(): Response
     {
         $data = [
-            'blogs' => Blog::select(['id', 'slug', 'title', 'excerpt', 'body1', 'body2', 'picture1', 'picture2', 'category_articles_id', 'user_id', 'views', 'created_at'])
+            'blogs' => Blog::select(['id', 'slug', 'title', 'excerpt', 'body1', 'body2', 'picture1', 'picture2', 'tags', 'category_articles_id', 'user_id', 'views', 'created_at'])
                 ->with('category')
                 ->with('author')
                 ->where('user_id', Auth::id())
