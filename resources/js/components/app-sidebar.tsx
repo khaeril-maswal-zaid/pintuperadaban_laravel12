@@ -18,6 +18,11 @@ const mainNavItems: NavItem[] = [
         href: route('blog.index'),
         icon: FileText,
     },
+    {
+        title: 'Advertisements',
+        href: route('iklan.index'),
+        icon: Folder,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

@@ -1,280 +1,372 @@
-"use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Save, X } from "lucide-react"
+'use client';
+
+import type React from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { router } from '@inertiajs/react';
+import { ImageIcon, Save, Upload, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const advertisementSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters").max(100, "Title too long"),
-  client: z.string().min(2, "Client name must be at least 2 characters").max(50, "Client name too long"),
-  position: z.string().min(1, "Please select a position"),
-  type: z.string().min(1, "Please select a type"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  description: z.string().min(10, "Description must be at least 10 characters").max(300, "Description too long"),
-  imageUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  targetUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-})
+    owner: z.string().min(3, 'Nama owner minimal 3 karakter').max(100, 'Nama owner terlalu panjang'),
+    brand: z.string().min(2, 'Nama brand minimal 2 karakter').max(50, 'Nama brand terlalu panjang'),
+    no_hp: z.string().min(10, 'Kontak minimal 10 karakter').max(200, 'Kontak terlalu panjang'),
+    status: z.enum(['active', 'nonactive'], { required_error: 'Status harus dipilih' }),
+    type: z.string().min(1, 'Tipe iklan harus dipilih'),
+    image: z.string().optional(),
+});
 
-type AdvertisementFormData = z.infer<typeof advertisementSchema>
+type AdvertisementFormData = z.infer<typeof advertisementSchema>;
 
 interface Advertisement {
-  id?: number
-  title: string
-  client: string
-  position: string
-  type: string
-  startDate: string
-  endDate: string
-  description: string
-  imageUrl?: string
-  targetUrl?: string
-  clicks?: number
-  impressions?: number
+    id?: number;
+    owner: string;
+    brand: string;
+    no_hp: string;
+    status: 'active' | 'nonactive';
+    type: string;
+    image: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 interface AdvertisementModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSave: (advertisement: Advertisement) => void
-  advertisement?: Advertisement
-  mode: "create" | "edit"
+    isOpen: boolean;
+    onClose: () => void;
+    advertisement?: Advertisement;
+    mode: 'create' | 'edit';
 }
 
-const positionOptions = ["Header", "Sidebar", "Footer", "Article Content", "Between Posts"]
-const typeOptions = ["Banner", "Display", "Native", "Video", "Text"]
+const advertisementTypes = [
+    'Banner Website',
+    'Display Sidebar',
+    'Native Content',
+    'Video Advertisement',
+    'Pop-up Banner',
+    'Header Banner',
+    'Footer Banner',
+    'Article Inline',
+];
 
-export function AdvertisementModal({ isOpen, onClose, onSave, advertisement, mode }: AdvertisementModalProps) {
-  const { toast } = useToast()
+export function AdvertisementModal({ isOpen, onClose, advertisement, mode }: AdvertisementModalProps) {
+    const { toast } = useToast();
+    const [imagePreview, setImagePreview] = useState<string>('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-    reset,
-  } = useForm<AdvertisementFormData>({
-    resolver: zodResolver(advertisementSchema),
-    defaultValues: {
-      title: advertisement?.title || "",
-      client: advertisement?.client || "",
-      position: advertisement?.position || "",
-      type: advertisement?.type || "",
-      startDate: advertisement?.startDate || "",
-      endDate: advertisement?.endDate || "",
-      description: advertisement?.description || "",
-      imageUrl: advertisement?.imageUrl || "",
-      targetUrl: advertisement?.targetUrl || "",
-    },
-  })
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setValue,
+        watch,
+        reset,
+        setError,
+        clearErrors,
+    } = useForm<AdvertisementFormData>({
+        resolver: zodResolver(advertisementSchema),
+        defaultValues: {
+            owner: '',
+            brand: '',
+            no_hp: '',
+            status: 'active',
+            type: '',
+            image: '',
+        },
+    });
 
-  const onSubmit = (data: AdvertisementFormData) => {
-    try {
-      const advertisementData: Advertisement = {
-        ...data,
-        id: advertisement?.id,
-        clicks: advertisement?.clicks || 0,
-        impressions: advertisement?.impressions || 0,
-      }
+    // Reset form when modal opens/closes or advertisement changes
+    useEffect(() => {
+        if (isOpen) {
+            if (mode === 'edit' && advertisement) {
+                setValue('owner', advertisement.owner);
+                setValue('brand', advertisement.brand);
+                setValue('no_hp', advertisement.no_hp);
+                setValue('status', advertisement.status);
+                setValue('type', advertisement.type);
+                setValue('image', advertisement.image);
 
-      onSave(advertisementData)
+                // ✅ cek apakah path sudah full URL atau masih relatif
+                const imageUrl = advertisement.image?.startsWith('http') ? advertisement.image : `/storage/${advertisement.image}`;
 
-      toast({
-        title: mode === "create" ? "Advertisement Created!" : "Advertisement Updated!",
-        description: `Advertisement "${data.title}" has been ${mode === "create" ? "created" : "updated"} successfully.`,
-      })
+                setImagePreview(imageUrl);
+                setSelectedFile(null);
+            } else {
+                reset({
+                    owner: '',
+                    brand: '',
+                    no_hp: '',
+                    status: 'active',
+                    type: '',
+                    image: '',
+                });
+                setImagePreview('');
+                setSelectedFile(null);
+            }
+        }
+    }, [isOpen, mode, advertisement, setValue, reset]);
 
-      reset()
-      onClose()
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                setError('image', { type: 'manual', message: 'Format file harus berupa JPEG, PNG, GIF, atau WebP' });
+                return;
+            }
 
-  const handleClose = () => {
-    reset()
-    onClose()
-  }
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                setError('image', { type: 'manual', message: 'Ukuran file maksimal 5MB' });
+                return;
+            }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            {mode === "create" ? "Create New Advertisement" : "Edit Advertisement"}
-            <Button variant="ghost" size="sm" onClick={handleClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </DialogTitle>
-        </DialogHeader>
+            clearErrors('image');
+            setSelectedFile(file);
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Title and Client */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">Campaign Title *</Label>
-              <Input
-                id="title"
-                {...register("title")}
-                placeholder="Enter campaign title..."
-                className={errors.title ? "border-red-500" : ""}
-              />
-              {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
-            </div>
+            // ✅ preview dari file, bukan base64
+            setImagePreview(URL.createObjectURL(file));
 
-            <div>
-              <Label htmlFor="client">Client Name *</Label>
-              <Input
-                id="client"
-                {...register("client")}
-                placeholder="Enter client name..."
-                className={errors.client ? "border-red-500" : ""}
-              />
-              {errors.client && <p className="text-red-500 text-sm mt-1">{errors.client.message}</p>}
-            </div>
-          </div>
+            // ✅ kasih nama file biar zod tidak error
+            setValue('image', file.name);
+        }
+    };
 
-          {/* Position, Type, and Status */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="position">Position *</Label>
-              <Select onValueChange={(value) => setValue("position", value)} defaultValue={advertisement?.position}>
-                <SelectTrigger className={errors.position ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select position" />
-                </SelectTrigger>
-                <SelectContent>
-                  {positionOptions.map((position) => (
-                    <SelectItem key={position} value={position}>
-                      {position}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.position && <p className="text-red-500 text-sm mt-1">{errors.position.message}</p>}
-            </div>
+    const handleRemoveImage = () => {
+        setSelectedFile(null);
+        setImagePreview('');
+        setValue('image', '');
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
 
-            <div>
-              <Label htmlFor="type">Type *</Label>
-              <Select onValueChange={(value) => setValue("type", value)} defaultValue={advertisement?.type}>
-                <SelectTrigger className={errors.type ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {typeOptions.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>}
-            </div>
+    const onSubmit = (data: AdvertisementFormData) => {
+        const formData = new FormData();
 
-            <div>
-              <Label htmlFor="status">Status *</Label>
-              <Select
-                onValueChange={(value: "active" | "paused" | "expired") => setValue("status", value)}
-                defaultValue={advertisement?.status || "active"}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
-                  <SelectItem value="expired">Expired</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        formData.append('owner', data.owner);
+        formData.append('brand', data.brand);
+        formData.append('no_hp', data.no_hp);
+        formData.append('status', data.status);
+        formData.append('type', data.type);
 
-          {/* Dates */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="startDate">Start Date *</Label>
-              <Input
-                id="startDate"
-                type="date"
-                {...register("startDate")}
-                className={errors.startDate ? "border-red-500" : ""}
-              />
-              {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
-            </div>
+        if (selectedFile) {
+            formData.append('image', selectedFile);
+        }
 
-            <div>
-              <Label htmlFor="endDate">End Date *</Label>
-              <Input
-                id="endDate"
-                type="date"
-                {...register("endDate")}
-                className={errors.endDate ? "border-red-500" : ""}
-              />
-              {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
-            </div>
-          </div>
+        if (mode === 'create') {
+            router.post(route('iklan.store'), formData, {
+                forceFormData: true,
+                onSuccess: () => {
+                    handleClose();
+                },
+                onError: (err) => {
+                    console.error(err);
+                    toast({ title: 'Error', description: 'Gagal menambahkan iklan' });
+                },
+            });
+        } else {
+            router.post(route('iklan.update', advertisement?.id), formData, {
+                forceFormData: true,
+                headers: { 'X-HTTP-Method-Override': 'PUT' },
+                onSuccess: () => {
+                    handleClose();
+                },
+                onError: (err) => {
+                    console.error(err);
+                    toast({ title: 'Error', description: 'Gagal memperbarui iklan' });
+                },
+            });
+        }
+    };
 
-          {/* URLs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input
-                id="imageUrl"
-                {...register("imageUrl")}
-                placeholder="https://example.com/image.jpg"
-                className={errors.imageUrl ? "border-red-500" : ""}
-              />
-              {errors.imageUrl && <p className="text-red-500 text-sm mt-1">{errors.imageUrl.message}</p>}
-            </div>
+    const handleClose = () => {
+        reset();
+        setImagePreview('');
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+        onClose();
+    };
 
-            <div>
-              <Label htmlFor="targetUrl">Target URL</Label>
-              <Input
-                id="targetUrl"
-                {...register("targetUrl")}
-                placeholder="https://example.com"
-                className={errors.targetUrl ? "border-red-500" : ""}
-              />
-              {errors.targetUrl && <p className="text-red-500 text-sm mt-1">{errors.targetUrl.message}</p>}
-            </div>
-          </div>
+    return (
+        <Dialog open={isOpen} onOpenChange={handleClose}>
+            <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center justify-between">
+                        {mode === 'create' ? 'Tambah Iklan Baru' : 'Edit Iklan'}
+                        <Button variant="ghost" size="sm" onClick={handleClose}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </DialogTitle>
+                </DialogHeader>
 
-          {/* Description */}
-          <div>
-            <Label htmlFor="description">Description *</Label>
-            <Textarea
-              id="description"
-              {...register("description")}
-              placeholder="Brief description of the advertisement..."
-              rows={3}
-              className={errors.description ? "border-red-500" : ""}
-            />
-            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
-          </div>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    {/* Owner and Brand */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <Label htmlFor="owner">Nama Owner/Perusahaan *</Label>
+                            <Input
+                                id="owner"
+                                {...register('owner')}
+                                placeholder="PT. Contoh Perusahaan"
+                                className={errors.owner ? 'border-red-500' : ''}
+                            />
+                            {errors.owner && <p className="mt-1 text-sm text-red-500">{errors.owner.message}</p>}
+                        </div>
 
-          {/* Actions */}
-          <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              <Save className="w-4 h-4 mr-2" />
-              {mode === "create" ? "Create Advertisement" : "Update Advertisement"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
+                        <div>
+                            <Label htmlFor="brand">Nama Brand *</Label>
+                            <Input id="brand" {...register('brand')} placeholder="Brand Awesome" className={errors.brand ? 'border-red-500' : ''} />
+                            {errors.brand && <p className="mt-1 text-sm text-red-500">{errors.brand.message}</p>}
+                        </div>
+                    </div>
+
+                    {/* Contact */}
+                    <div>
+                        <Label htmlFor="no_hp">Informasi Kontak *</Label>
+                        <Textarea
+                            id="no_hp"
+                            {...register('no_hp')}
+                            placeholder="Email: no_hp@brand.com | Telepon: +62 812-3456-7890 | Website: www.brand.com"
+                            rows={3}
+                            className={errors.no_hp ? 'border-red-500' : ''}
+                        />
+                        {errors.no_hp && <p className="mt-1 text-sm text-red-500">{errors.no_hp.message}</p>}
+                        <p className="mt-1 text-sm text-gray-500">Masukkan email, nomor telepon, dan informasi kontak lainnya</p>
+                    </div>
+
+                    {/* Type and Status */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <Label htmlFor="type">Tipe Iklan *</Label>
+                            <Select onValueChange={(value) => setValue('type', value)} value={watch('type')}>
+                                <SelectTrigger className={errors.type ? 'border-red-500' : ''}>
+                                    <SelectValue placeholder="Pilih tipe iklan" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {advertisementTypes.map((type) => (
+                                        <SelectItem key={type} value={type}>
+                                            {type}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.type && <p className="mt-1 text-sm text-red-500">{errors.type.message}</p>}
+                        </div>
+
+                        <div>
+                            <Label htmlFor="status">Status *</Label>
+                            <Select onValueChange={(value: 'active' | 'nonactive') => setValue('status', value)} value={watch('status')}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Aktif</SelectItem>
+                                    <SelectItem value="nonactive">Nonaktif</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {/* Image Upload Section */}
+                    <div className="space-y-4">
+                        <Label htmlFor="image">Gambar Iklan *</Label>
+                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                            <div className="space-y-4">
+                                {/* File Input */}
+                                <div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                        id="image-upload"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className={`h-32 w-full border-2 border-dashed ${
+                                            errors.image ? 'border-red-500' : 'border-gray-300'
+                                        } transition-colors hover:border-gray-400`}
+                                    >
+                                        <div className="text-center">
+                                            <Upload className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+                                            <p className="text-sm text-gray-600">{selectedFile ? selectedFile.name : 'Klik untuk pilih gambar'}</p>
+                                            <p className="mt-1 text-xs text-gray-500">JPEG, PNG, GIF, WebP (Max 5MB)</p>
+                                        </div>
+                                    </Button>
+                                </div>
+
+                                {/* File Info */}
+                                {selectedFile && (
+                                    <div className="rounded-lg bg-gray-50 p-3">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-700">{selectedFile.name}</p>
+                                                <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={handleRemoveImage}
+                                                className="text-red-600 hover:text-red-700"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {errors.image && <p className="text-sm text-red-500">{errors.image.message}</p>}
+                            </div>
+
+                            {/* Image Preview */}
+                            <div className="rounded-lg border-2 border-dashed border-gray-300 p-4 text-center">
+                                {imagePreview ? (
+                                    <div className="space-y-2">
+                                        <img
+                                            src={imagePreview || '/placeholder.svg'}
+                                            alt="Preview"
+                                            className="mx-auto max-h-48 max-w-full rounded object-contain"
+                                        />
+                                        <p className="text-sm text-gray-600">Preview Gambar</p>
+                                    </div>
+                                ) : (
+                                    <div className="py-12">
+                                        <ImageIcon className="mx-auto mb-2 h-16 w-16 text-gray-400" />
+                                        <p className="text-sm text-gray-500">Preview gambar akan muncul di sini</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end space-x-2 border-t pt-4">
+                        <Button type="button" variant="outline" onClick={handleClose}>
+                            Batal
+                        </Button>
+                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                            <Save className="mr-2 h-4 w-4" />
+                            {mode === 'create' ? 'Tambah Iklan' : 'Perbarui Iklan'}
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
 }
