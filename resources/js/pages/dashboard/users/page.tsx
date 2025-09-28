@@ -1,10 +1,10 @@
-// import { AdminLayout } from "@/components/admin/admin-layout"
-// import { UsersManagement } from "@/components/admin/users-management"
+import { UsersManagement } from '@/components/dashboard/users-management';
+import AppLayout from '@/layouts/app-layout';
 
-// export default function UsersPage() {
-//   return (
-//     <AdminLayout>
-//       <UsersManagement />
-//     </AdminLayout>
-//   )
-// }
+export default function UsersPage({ mockUsers }: any) {
+    return (
+        <AppLayout>
+            <UsersManagement mockUsers={mockUsers} />
+        </AppLayout>
+    );
+}
