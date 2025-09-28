@@ -18,6 +18,7 @@ interface Article {
     views: number;
     body1: string;
     body2: string;
+    tags: any;
 }
 
 interface ArticleDetailProps {

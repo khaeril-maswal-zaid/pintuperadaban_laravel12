@@ -51,7 +51,7 @@ class Blog extends Model
     public function populer()
     {
         $populer = $this->select(['slug', 'title', 'picture1', 'category_articles_id',  'user_id', 'views', 'created_at'])
-            // ->where('created_at', '>=', Carbon::now()->subDays(70))
+            ->where('created_at', '>=', Carbon::now()->subDays(70))
             ->with(['category', 'author'])
             ->orderByDesc('views')
             ->take(5)
@@ -65,7 +65,8 @@ class Blog extends Model
         $datas = require database_path("artikel.php");
 
         $this->query()->delete();
-        DB::statement('ALTER TABLE blogs AUTO_INCREMENT = 1');
+        // DB::statement('ALTER TABLE blogs AUTO_INCREMENT = 1'); //mysql
+       DB::statement("DELETE FROM sqlite_sequence WHERE name='blogs'"); //sqlite
 
         $artikel = [];
         foreach ($datas as $key => $data) {

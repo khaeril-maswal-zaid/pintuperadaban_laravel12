@@ -28,6 +28,10 @@ export interface SharedData {
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+    kontaks: any;
+    mains: any;
+    categories: any;
+    iklans: any;
     [key: string]: unknown;
 }
 
@@ -36,6 +40,7 @@ export interface User {
     name: string;
     email: string;
     avatar?: string;
+    image?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;

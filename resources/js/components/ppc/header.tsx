@@ -28,7 +28,7 @@ export function Header() {
     return (
         <>
             {/* Top Bar */}
-            <div className="hidden bg-gray-900 lg:block">
+            <div className="hidden bg-gray-900 md:block">
                 <div className="container mx-auto px-4">
                     <div className="flex items-center justify-between py-2">
                         <nav className="flex items-center space-x-6">

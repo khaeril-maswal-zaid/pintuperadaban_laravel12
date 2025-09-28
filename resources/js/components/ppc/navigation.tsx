@@ -2,13 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { ChevronDown, Menu, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
 export function Navigation() {
     const [isOpen, setIsOpen] = useState(false);
-    const { categories } = usePage().props;
+    const { categories } = usePage<SharedData>().props;
 
     return (
         <nav className="bg-gray-900 text-white">
@@ -22,13 +23,13 @@ export function Navigation() {
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <Button variant="ghost" size="sm" className="text-white lg:hidden" onClick={() => setIsOpen(!isOpen)}>
+                    <Button variant="ghost" size="sm" className="text-white md:hidden" onClick={() => setIsOpen(!isOpen)}>
                         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                     </Button>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden w-full items-center justify-between py-3 lg:flex">
-                        <div className="flex items-center space-x-8">
+                    <div className="hidden w-full items-center justify-between py-3 md:flex">
+                        <div className="flex items-center xl:space-x-8 space-x-5">
                             <a href="/" className="font-medium hover:text-yellow-400">
                                 Home
                             </a>
@@ -82,19 +83,19 @@ export function Navigation() {
 
                     {/* Mobile Navigation */}
                     {isOpen && (
-                        <div className="absolute top-full right-0 left-0 z-50 border-t border-gray-700 bg-gray-900 lg:hidden">
+                        <div className="absolute top-17 right-0 left-0 z-50 border-t border-gray-700 bg-gray-900 md:hidden">
                             <div className="space-y-4 px-4 py-4">
                                 <a href="/" className="block font-medium text-yellow-400">
                                     Home
                                 </a>
                                 <a href={route('category.show', 'news')} className="block hover:text-yellow-400">
-                                    Latest News
+                                    Berita Peradaban
                                 </a>
                                 <a href={route('category.show', 'opini')} className="block hover:text-yellow-400">
-                                    Opini
+                                    Opini Peradaban
                                 </a>
                                 <a href={route('category.show', 'the-story')} className="block hover:text-yellow-400">
-                                    The Story
+                                    Story Peradaban
                                 </a>
 
                                 <div className="space-y-2">

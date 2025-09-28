@@ -54,10 +54,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                             <Input
                                 id="name"
-                                className="mt-1 block w-full"
+                                className="mt-1 block w-full bg-gray-100"
                                 value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                required
+                                // onChange={(e) => setData('name', e.target.value)}
+                                readOnly
                                 autoComplete="name"
                                 placeholder="Full name"
                             />

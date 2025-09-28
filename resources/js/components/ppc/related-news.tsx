@@ -7,15 +7,18 @@ interface RelatedArticle {
     category: any;
     created_at: string;
     picture1: string;
-    author: string;
+    author: {
+        name: string;
+        image: string;
+    };
     authorImage: string;
     views: number;
-    href: string;
-    excerpt?: string;
+    slug: string;
+    excerpt: string;
 }
 
 export function RelatedNews({ latestBlog }: any) {
-    const relatedArticles: RelatedArticle[] = latestBlog[0];
+    const relatedArticles: RelatedArticle = latestBlog[0];
     const smallRelatedNews: RelatedArticle[] = latestBlog.slice(1, 3);
 
     function formatTanggalIndo(tanggal: any) {
@@ -92,10 +95,10 @@ export function RelatedNews({ latestBlog }: any) {
                                 <span className="text-xs text-gray-600">{item.created_at}</span>
                             </div>
                             <a
-                                href={item.href}
+                                href={item.slug}
                                 className="line-clamp-2 text-sm font-bold text-gray-900 uppercase transition-colors hover:text-yellow-600"
                             >
-                                {item.title}
+                               {item.title}
                             </a>
                         </div>
                     </article>
