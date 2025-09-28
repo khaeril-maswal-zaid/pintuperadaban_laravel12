@@ -19,8 +19,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('dashboard/blog/update/{blog:slug}', [BlogController::class, 'update'])->name('blog.update');
 });
 
-//super_admin
-Route::middleware(['auth', 'verified'])->group(function () {
+//superadmin
+Route::middleware(['auth', 'verified', 'role:superadmin'])->group(function () {
+    Route::delete('dashboard/blog/update/{blog:slug}', [BlogController::class, 'destroy'])->name('blog.delete');
+
     Route::get('dashboard/advertisements', [IklanController::class, 'index'])->name('iklan.index');
     Route::post('dashboard/advertisements/store', [IklanController::class, 'store'])->name('iklan.store');
     Route::put('dashboard/advertisements/{iklan}', [IklanController::class, 'update'])->name('iklan.update');

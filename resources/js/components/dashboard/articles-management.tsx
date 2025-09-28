@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { router } from '@inertiajs/react';
 import { Calendar, Edit, Eye, Filter, MoreHorizontal, Search, Trash2, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import BlogPostModal from './blog_post_modal_edit';
@@ -48,13 +49,20 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
         return matchesSearch && matchesCategory;
     });
 
-    const handleDelete = (id: number) => {
-        const article = articles.find((a) => a.id === id);
-        setArticles(articles.filter((a) => a.id !== id));
+    const handleDelete = (slug: string) => {
+        const article = articles.find((a) => a.slug === slug);
+        setArticles(articles.filter((a) => a.slug !== slug));
 
-        toast({
-            title: 'Article Deleted',
-            description: `Article "${article?.title}" has been deleted successfully.`,
+        router.delete(route('blog.delete', slug), {
+            onSuccess: () => {
+                toast({
+                    title: 'Article Deleted',
+                    description: `Article "${article?.title}" has been deleted successfully.`,
+                });
+            },
+            onError: () => {
+                //
+            },
         });
     };
 
@@ -193,7 +201,7 @@ export function ArticlesManagement({ mockArticles }: { mockArticles?: Article[] 
                                                         <Edit className="mr-2 h-4 w-4" />
                                                         Edit
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(article.id)}>
+                                                    <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(article.slug)}>
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Delete
                                                     </DropdownMenuItem>

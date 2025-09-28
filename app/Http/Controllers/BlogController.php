@@ -216,7 +216,7 @@ class BlogController extends Controller
      */
     public function destroy(Blog $blog)
     {
-        //
+        $blog->delete();
     }
 
     function home(): Response

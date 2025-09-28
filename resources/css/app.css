@@ -157,3 +157,8 @@
         @apply bg-background text-foreground;
     }
 }
+
+.ProseMirror {
+    min-height: 300px !important;
+    padding: 1rem;
+}
